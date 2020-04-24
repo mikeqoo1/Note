@@ -14,3 +14,6 @@ usermod -g 主要群組 帳號名稱
 
 ### 增加次要群組
 usermod -a -G 次要群組 帳號名稱
+
+### 查詢資料夾大小
+du -shc /home/Projects/*
