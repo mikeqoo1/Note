@@ -1,11 +1,39 @@
 # Mariadb的相關手冊
 
+## 安裝篇
+
+```
+1.sudo vi /etc/yum.repos.d/MariaDB.repo
+檔案內容如下 
+[mariadb]
+name = MariaDB
+baseurl = http://yum.mariadb.org/10.4/centos8-amd64
+gpgkey=https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
+gpgcheck=1
+
+2.sudo dnf install boost-program-options
+3.sudo dnf install MariaDB-server MariaDB-client --disablerepo=AppStream 
+4.sudo systemctl enable --now mariadb
+5.sudo mysql_secure_installation
+
+更換資料庫的目錄
+1.sudo systemctl stop mariadb
+2.sudo mkdir /database/mariadb
+3.sudo cp -Rp /var/lib/mysql/* /database/mariadb
+4.sudo chown -R mysql:mysql /database/mariadb
+5. sudo vi /etc/my.cnf
+內容如下
+    [mysqld]
+    datadir = /database/mariadb
+```
+
 ## 權限篇
 
 ```sql
 CREATE USER 'dbuser'@'%' IDENTIFIED BY 'password';
 GRANT ALL PRIVILEGES ON *.* TO 'dbuser'@'%' IDENTIFIED BY PASSWORD 'password';(不含管理權限)
 GRANT ALL PRIVILEGES ON *.* TO 'dbuser'@'%' IDENTIFIED BY PASSWORD 'password' WITH GRANT OPTION;(最高權限, 同root)
+SHOW GRANTS FOR 'user'@'%';(查看帳號權限)
 ```
 
 ## Galera篇
