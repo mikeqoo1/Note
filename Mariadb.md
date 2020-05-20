@@ -56,3 +56,13 @@ sudo vi /etc/hosts
 #### 步驟3.
 都先關閉2邊的DB,接下來去設定DB config, 設定好後, 啟動一邊, 記得使用
 galera_new_cluster來啟動, 成功開啟後, 另一邊就用sudo systemctl start 的方式啟動就好
+
+踩坑紀錄
+galera mysql cluster 故障node再次接入集群遇到的問題 
+- http://blog.itpub.net/133735/viewspace-2140548/
+```
+結論 避開這個問題的方法 就是 機器的配置 wsrep-cluster-address 的選項裡, 本機的ip不要放在第一位
+```
+
+重新啟動同步, 失敗的處理方式
+- https://www.cnblogs.com/nulige/articles/8470001.html
