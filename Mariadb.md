@@ -47,7 +47,7 @@ sudo hostname 主機名稱
 接下來編輯/etc/hostname文件並更新主機名稱
 sudo vi /etc/hostname
 
-最後，編輯/etc/hosts文件並更新主機名稱
+最後, 編輯/etc/hosts文件並更新主機名稱
 sudo vi /etc/hosts
 ```
 #### 步驟2.
@@ -66,3 +66,48 @@ galera mysql cluster 故障node再次接入集群遇到的問題
 
 重新啟動同步, 失敗的處理方式
 - https://www.cnblogs.com/nulige/articles/8470001.html
+
+常用的除錯指令:
+
+show full processlist 可以看到所有連接的情况, 但是大多連接的 state 其實是 Sleep 的, 空閒的狀態, 没有太多問題
+
+過濾sleep的狀態
+select id, db, user, host, command, time, state, info from information_schema.processlist where command != 'Sleep' order by time desc 
+
+id - process ID (可以用：kill id)
+command - 當下執行的命令, 比如最常見的:Sleep, Query, Connect...
+time - 花費的時間(秒)
+state - 執行狀態, 比如:Sending data, Sorting for group, Creating tmp table, Locked...
+info - 執行的SQL語法
+
+explain 分析一下 SQL 語法
+
+
+Command 的值：
+
+Binlog Dump: 主node正在將二進位日志, 同步到从node
+Change User: 正在執行一個change-user的操作
+Close Stmt: 正在關閉一個Prepared Statement对象
+Connect: 一個node連上了主node
+Connect Out: 一個從node正在連主node
+Create DB: 正在執行一個create-database的操作
+Daemon: DB内部process, 而不是來自User的連線
+Delayed Insert: 該process是一個延遲插入的處理程序
+Drop DB: 正在執行一個drop-database的操作
+Execute: 正在執行一個Prepared Statement
+Fetch: 正在從Prepared Statement中獲取執行结果
+Field List: 正在獲取表的列信息
+Init DB: 該process正在選取一個默認的DB
+Kill : 正在執行kill語法, 殺死指定process
+Long Data: 正在從Prepared Statement中查看long data
+Ping: 正在處理server-ping的請求
+Prepare: process正在準備一個Prepared Statement
+ProcessList: process正在產生process相關訊息
+Register Slave： 正在註冊從node
+Reset Stmt: 正在重置prepared statement
+Set Option: 正在設定或重置User的statement-execution選項
+Statistics: process正在產生server-status信息
+Time: Unused
+
+
+
