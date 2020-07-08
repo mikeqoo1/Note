@@ -110,4 +110,23 @@ Statistics: process正在產生server-status信息
 Time: Unused
 
 
+## Galera異常失去同步復原篇
+
+情況1 當備份的DB關閉的時候, 直接起動, 不需要更改任何設定
+
+情況2 當整個DB集合關閉的時候, 選一個當頭, 修改grastate.dat的內容, 把seqno改1, 執行galera_new_cluster
+其他的節點systemctl start mariadb
+
+```
+vi grastate.dat
+
+# GALERA saved state
+version: 2.1
+uuid:    675d9d38-61de-11ea-9d6e-c75c611ddc7e
+seqno:   -1
+safe_to_bootstrap: 0
+```
+
+情況3 當主要頭的DB關閉的時候, 請去其他節點, 修改grastate.dat的內容, safe_to_bootstrap: 0 改 1, 強行當頭同步
+
 
