@@ -29,3 +29,4 @@ du -shc /home/Projects/*
 
 ### CentOS8.x設定
 
+### nftables
