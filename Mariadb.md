@@ -85,6 +85,7 @@ explain 分析一下 SQL 語法
 
 Command 的值：
 
+```
 Binlog Dump: 主node正在將二進位日志, 同步到从node
 Change User: 正在執行一個change-user的操作
 Close Stmt: 正在關閉一個Prepared Statement对象
@@ -108,7 +109,7 @@ Reset Stmt: 正在重置prepared statement
 Set Option: 正在設定或重置User的statement-execution選項
 Statistics: process正在產生server-status信息
 Time: Unused
-
+```
 
 ## Galera異常失去同步復原篇
 
