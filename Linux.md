@@ -17,3 +17,16 @@ usermod -a -G 次要群組 帳號名稱
 
 ### 查詢資料夾大小
 du -shc /home/Projects/*
+
+
+
+
+### Linux Disk I/O 效能測試 - sysbench
+
+安裝:yum install sysbench
+
+準備測試假資料:sysbench --test=fileio --num-threads=20 --file-total-size=1G --file-test-mode=rndrw prepare
+
+讀寫測試:sysbench --test=fileio --num-threads=20 --file-total-size=1G --file-test-mode=rndrw run
+
+刪除假資料:sysbench --test=fileio --num-threads=20 --file-total-size=1G --file-test-mode=rndrw cleanup
