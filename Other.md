@@ -32,3 +32,30 @@ C_Cpp: Clang_format_fallback Style, 如果上面的選項是file, 但是沒有.
 
 clang-format -style=5種格式選一個 -dump-config > .clang-format
 ```
+
+## MariadbCpp Lib 安裝
+
+cmake > 3.1.0 && gcc 要支援 C++11
+
+```
+sudo yum -y install git cmake make gcc openssl-devel
+git clone https://github.com/MariaDB-Corporation/mariadb-connector-cpp.git
+mkdir build && cd build
+cmake ../mariadb-connector-cpp/ -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCONC_WITH_UNIT_TESTS=Off -DCMAKE_INSTALL_PREFIX=/usr/local -DWITH_SSL=OPENSSL
+cmake --build . --config RelWithDebInfo
+sudo make install
+```
+
+cmake 升級
+
+```
+wget https://cmake.org/files/v3.17/cmake-3.17.3.tar.gz
+tar -zxvf cmake-3.17.3.tar.gz
+cd cmake-3.17.3
+sudo ./bootstrap --prefix=/usr/local
+sudo make
+sudo make install
+vi ~/.bash_profile
+PATH=/usr/local/bin:$PATH:$HOME/bin
+
+```
