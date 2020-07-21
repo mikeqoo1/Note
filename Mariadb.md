@@ -131,3 +131,30 @@ safe_to_bootstrap: 0
 情況3 當主要頭的DB關閉的時候, 請去其他節點, 修改grastate.dat的內容, safe_to_bootstrap: 0 改 1, 強行當頭同步
 
 
+## Table Metadata Lock
+
+
+- 1. 有大query卡住, 阻塞DDL, 阻塞所有同表的後續操作
+```
+show processlist
+kill掉DDL的session
+```
+- 2. 沒有提交的commit, 阻塞DDL, 阻塞所有同表的後續操作
+```
+select * from information_schema.innodb_trx\G
+找到未提交的sid, 然後kill掉
+```
+- 3. 都沒有大query, 和沒提交的commit
+```
+(該語法有執行完畢但是狀態是Sleep, 就是未提交, 就會看不到對應的trx_query)
+SELECT * FROM information_schema.innodb_trx;
+
+通過performance_schema.events_statements_current來檢查對應的sql, 包含已經執行完, 但没有提交的
+
+SELECT b.processlist_id, c.db, a.sql_text, c.command, c.time, c.state
+FROM performance_schema.events_statements_current a JOIN performance_schema.threads b USING(thread_id)
+JOIN information_schema.processlist c ON b.processlist_id = c.id
+WHERE a.sql_text NOT LIKE '%performance%';
+
+kill掉Sleep的
+```
