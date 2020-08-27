@@ -10,6 +10,21 @@ nvm install --lts
 
 ```
 
+## CentOS安裝Java
+```
+sudo yum install java-1.8.0-openjdk.x86_64
+sudo yum install java-1.8.0-openjdk-devel.x86_64
+sudo yum install java-1.8.0-openjdk-headless.x86_64
+sudo yum install javapackages-tools.noarch
+sudo yum install python-javapackages.noarch
+sudo yum install tzdata-java.noarch
+```
+
+## CentOS安裝Golang
+```
+sudo yum install golang
+```
+
 ## Clang-Format格式化教學
 
 在vscode 上使用 C/C++ 的排版功能
