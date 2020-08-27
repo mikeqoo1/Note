@@ -6,4 +6,6 @@
 
 ## [Git](Git.md)
 
+## [Readis](Readis.md)
+
 ## [其他](Other.md)
