@@ -57,6 +57,12 @@ sudo vi /etc/hosts
 都先關閉2邊的DB,接下來去設定DB config, 設定好後, 啟動一邊, 記得使用
 galera_new_cluster來啟動, 成功開啟後, 另一邊就用sudo systemctl start 的方式啟動就好
 
+#### 驗證同步
+show STATUS LIKE 'wsrep%'
+SHOW STATUS LIKE "wsrep_cluster_size";
+show STATUS LIKE "wsrep_cluster_status";
+show STATUS LIKE "wsrep_local_state_comment";
+
 踩坑紀錄
 galera mysql cluster 故障node再次接入集群遇到的問題 
 - http://blog.itpub.net/133735/viewspace-2140548/
@@ -81,7 +87,6 @@ state - 執行狀態, 比如:Sending data, Sorting for group, Creating tmp table
 info - 執行的SQL語法
 
 explain 分析一下 SQL 語法
-
 
 Command 的值：
 
