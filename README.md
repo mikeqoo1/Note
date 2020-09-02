@@ -8,4 +8,6 @@
 
 ## [Readis](Readis.md)
 
+## [Elastic](Elastic.md)
+
 ## [其他](Other.md)
