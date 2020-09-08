@@ -74,3 +74,9 @@ vi ~/.bash_profile
 PATH=/usr/local/bin:$PATH:$HOME/bin
 
 ```
+
+## mycli安裝
+```bash
+sudo yum install python3-devel
+sudo pip3 install mycli
+```
