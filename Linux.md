@@ -1,6 +1,9 @@
 ### 新增使用者
 sudo useradd 帳號名稱
 
+### 新增群組
+sudo groupadd 群組名稱
+
 ### 設定密碼
 sudo passwd 帳號名稱
 
@@ -14,6 +17,11 @@ usermod -g 主要群組 帳號名稱
 
 ### 增加次要群組
 usermod -a -G 次要群組 帳號名稱
+
+### 同時更改擁有者與群組
+檔案:sudo chown user:group File
+
+資料夾:sudo chown -R user:group Folder
 
 ### 查詢資料夾大小
 du -shc /home/Projects/*
