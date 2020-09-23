@@ -34,6 +34,12 @@ CREATE USER 'dbuser'@'%' IDENTIFIED BY 'password';
 GRANT ALL PRIVILEGES ON *.* TO 'dbuser'@'%' IDENTIFIED BY PASSWORD 'password';(不含管理權限)
 GRANT ALL PRIVILEGES ON *.* TO 'dbuser'@'%' IDENTIFIED BY PASSWORD 'password' WITH GRANT OPTION;(最高權限, 同root)
 SHOW GRANTS FOR 'user'@'%';(查看帳號權限)
+
+(1372, 'Password hash should be a 41-digit hexadecimal number')如何處理
+select password('[你的密碼明碼]');
+create user '帳號'@'%' identified by password '你的加密密碼';
+
+遠端登入無法的問題 在設定檔加入 skip-grant-tables
 ```
 
 ## Galera篇

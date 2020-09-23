@@ -64,3 +64,5 @@ golang 使用apt-get install golang
 byobu htop mycli 都是一樣的
 
 MaraiDB 10.4 install - https://computingforgeeks.com/install-mariadb-10-on-ubuntu-18-04-and-centos-7/
+
+Ubuntu的防火牆指令是 sudo ufw allow 80/tcp
