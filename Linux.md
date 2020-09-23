@@ -55,3 +55,12 @@ III. 執行 sudo update-ca-trust
 IV. 開啟 Firefox，偏好設定 -> 隱私權與安全性 -> 憑證 -> 檢視憑證 -> 匯入剛剛載入的憑證(網站及郵件)
 ```
 
+### Ubuntu 基本開發工具
+
+node.js 使用nvm來安裝
+
+golang 使用apt-get install golang
+
+byobu htop mycli 都是一樣的
+
+MaraiDB 10.4 install - https://computingforgeeks.com/install-mariadb-10-on-ubuntu-18-04-and-centos-7/
