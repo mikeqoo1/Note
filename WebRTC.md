@@ -12,7 +12,7 @@
 作法是先建立一個資料夾, 把google的專案clone下來, 新增環境變數, 接著同步
 
 ```
-步驟1: mkdir ~/Workspace (先建立資料夾, 名字隨意)
+步驟1: mkdir ~/Workspace
 步驟2: git clone https://Workspace.googlesource.com/Workspace/tools/depot_tools.git (獲取depot_tools)
 步驟3: vi ~/.bashrc 在裡面新增 [export PATH=~/Workspace/depot_tools:"$PATH"]
 步驟4: source ~/.bashrc (生效)
@@ -65,10 +65,12 @@ xz -dc gcc-linaro-8.3.0-2019.03-x86_64_arm-linux-gnueabihf.tar.xz  | tar xvf -
 ln -sf gcc-linaro-8.3.0-2019.03-x86_64_arm-linux-gnueabihf  arm-linux-gnueabihf
 cd /opt
 sudo ln -sf ~/Workspace/rpi_rootfs
-vi ~/.bashrc
-export PATH=/opt/rpi_rootfs/tools/arm-linux-gnueabihf/bin:$PATH
-(在本來的export PATH後面加入/opt/rpi_rootfs/tools/arm-linux-gnueabihf/bin)
-(最後會變成這樣export PATH=~/Workspace/depot_tools:/opt/rpi_rootfs/tools/arm-linux-gnueabihf/bin:"$PATH")
+暫時生效: export PATH=/opt/rpi_rootfs/tools/arm-linux-gnueabihf/bin:$PATH
+永久生效 {
+    vi ~/.bashrc
+    在本來的export PATH後面加入/opt/rpi_rootfs/tools/arm-linux-gnueabihf/bin
+    最後會變成這樣export PATH=~/Workspace/depot_tools:/opt/rpi_rootfs/tools/arm-linux-gnueabihf/bin:"$PATH"
+}
 cd ~/Workspace/rpi_rootfs
 ./build_rootfs.sh download
 unzip yyyy-mm-dd-raspios-buster-armhf.zip
@@ -93,12 +95,11 @@ cp webrtc_arm_build_args.gn ~/Workspace/webrtc/src/out/arm_build/args.gn
 cd ~/Workspace/webrtc/src
 gn gen out/arm_build
 ninja -C out/arm_build
-
 cd ~/Workspace/rpi-webrtc-streamer/src
 make
 ```
 
-重新編譯
+重新編譯:
 ```
 cd ~/Workspace/webrtc/src
 gn clean out/arm_build
@@ -108,3 +109,7 @@ cd ~/Workspace/rpi-webrtc-streamer/src
 make clean
 make
 ```
+
+## 測試方法
+
+把build好的執行檔webrtc-streamer, 丟到樹莓派上面跑就知道了
