@@ -69,8 +69,13 @@ Ubuntu的防火牆指令是 sudo ufw allow 80/tcp
 
 ### Ubuntu下gcc/g++多版本共存和版本切換
 ```
-sudo apt-get install gcc-6 (安裝別的版本)
-sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-6 50(設定版本權重)
-sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 50(設定版本權重)
+sudo apt-get install gcc-7 (安裝別的版本)
+sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 50  (設定版本權重, 100是自動)
+sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 50  (設定版本權重)
+sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 100 (設定版本權重)
+sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 50
+sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 50
+sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-9 100
 sudo update-alternatives --config gcc(選用版本)
+sudo update-alternatives --config g++(選用版本)
 ```
