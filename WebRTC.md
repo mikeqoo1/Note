@@ -113,3 +113,5 @@ make
 ## 測試方法
 
 把build好的執行檔webrtc-streamer, 丟到樹莓派上面跑就知道了
+
+樹莓派需要安裝libjpeg, 指令: sudo apt-get install libjpeg9
