@@ -1,6 +1,5 @@
 # 樹莓派
 
-
 ### 增加硬碟空間
 
 步驟&&指令
@@ -23,3 +22,32 @@ sudo df -h
 
 
 [警告說明](https://mlog.club/article/1850639)
+
+### 影音串流Server
+[uv4l-server實做](https://github.com/PietroAvolio/uv4l-webrtc-raspberry-pi)
+
+[uv4l簡介](http://www.linux-projects.org/documentation/uv4l-server/)
+
+[MJPG-Streamer實做](https://sites.google.com/site/rasberrypintust/shu-mei-pai-xiao-ji-qiao/webcam-server/mjpg-streamer)
+
+[MJPG-Git](https://github.com/jacksonliam/mjpg-streamer)
+
+[webrtc-To-ios](https://github.com/SmallpTsai/rpi-webrtc-streaming-to-ios/blob/master/README-tw.md)
+
+### Linux上的Go程式編譯給RaspberryPI(ARM)的方法(交叉編譯)
+
+簡易範例:
+
+```makefile
+# 樹莓派
+pi:
+	GOOS=linux GOARCH=arm GOARM=7 go build -v -o a.out test.go
+
+# mac
+mac:
+	GOOS=darwin GOARCH=amd64 go build -o a.app test.go
+
+# windows
+windows:
+	GOOS=windows GOARCH=amd64 go build -o a.exe test.go
+```
