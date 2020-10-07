@@ -13,7 +13,7 @@
 
 ```
 步驟1: mkdir ~/Workspace
-步驟2: git clone https://Workspace.googlesource.com/Workspace/tools/depot_tools.git (獲取depot_tools)
+步驟2: git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git (獲取depot_tools)
 步驟3: vi ~/.bashrc 在裡面新增 [export PATH=~/Workspace/depot_tools:"$PATH"]
 步驟4: source ~/.bashrc (生效)
 步驟5: cd depot_tools/
@@ -115,3 +115,6 @@ make
 把build好的執行檔webrtc-streamer, 丟到樹莓派上面跑就知道了
 
 樹莓派需要安裝libjpeg, 指令: sudo apt-get install libjpeg9
+
+## 問題處理
+
