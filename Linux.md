@@ -79,3 +79,5 @@ sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-9 100
 sudo update-alternatives --config gcc(選用版本)
 sudo update-alternatives --config g++(選用版本)
 ```
+
+### system service
