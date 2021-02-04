@@ -80,4 +80,9 @@ sudo update-alternatives --config gcc(選用版本)
 sudo update-alternatives --config g++(選用版本)
 ```
 
+### Ubuntu手動安裝deb
+```
+sudo dpkg -i 軟體套件名.deb
+```
+
 ### system service
