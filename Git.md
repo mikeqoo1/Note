@@ -93,7 +93,7 @@ git rebase --continue
 git pull --prune --tags
 ```
 
-## 
+## Git刪除遠端Tag
 
 在Git v1.7.0 之後，可以使用這種語法刪除遠端標籤：
 ```
