@@ -169,3 +169,34 @@ WHERE a.sql_text NOT LIKE '%performance%';
 
 kill掉Sleep的
 ```
+
+## mysql效能分析show profile/show profiles
+
+show profile 和 show profiles 語句可以展示當前會話 (退出session後, profiling重置為0) 中執行語句的資源使用情況
+
+Profiling 功能由MySQL會話變數: profiling控制, 預設是OFF 關閉狀態 select @@profiling; OR show variables like '%profi%';
+
+開啟Profiling功能：
+```sql
+SET PROFILING = 1;
+```
+
+```sql
+SHOW PROFILES; [顯示最近傳送到伺服器上執行的語句的資源使用情況 顯示的記錄數由變數(profiling_history_size)控制, 預設15筆]
+
+SHOW PROFILE; [顯示最近一條語句執行的詳細資源佔用資訊, 預設顯示Status和Duration]
+
+[show profile 還可根據 show profiles 列表中的 Query_ID ,選擇顯示某條記錄的效能分析資訊]
+
+SHOW PROFILE FOR QUERY id;
+
+
+Syntax:
+SHOW PROFILE [type] FOR QUERY n
+type={ALL|BLOCK IO|CONTEXT SWITCHES|CPU|IPC|MEMORY|PAGE FAULTS|SOURCE|SWAPS}
+```
+
+已開啟連線數目
+```sql
+SHOW STATUS LIKE '%connected';
+```
