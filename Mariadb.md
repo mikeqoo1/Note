@@ -2,7 +2,7 @@
 
 ## 安裝篇
 
-```
+```txt
 1.sudo vi /etc/yum.repos.d/MariaDB.repo
 檔案內容如下 
 [mariadb]
@@ -44,10 +44,11 @@ create user '帳號'@'%' identified by password '你的加密密碼';
 
 ## Galera篇
 
-#### 步驟1.
+### 步驟1
+
 2台host和hostname需要先設定完成,設定方法如下:
 
-```
+```txt
 sudo hostname 主機名稱
 
 接下來編輯/etc/hostname文件並更新主機名稱
@@ -56,35 +57,44 @@ sudo vi /etc/hostname
 最後, 編輯/etc/hosts文件並更新主機名稱
 sudo vi /etc/hosts
 ```
-#### 步驟2.
+
+### 步驟2
+
 2邊的系統都要建立一個同步用的帳號, 大部分都使用root就好
 
-#### 步驟3.
+### 步驟3
+
 都先關閉2邊的DB,接下來去設定DB config, 設定好後, 啟動一邊, 記得使用
 galera_new_cluster來啟動, 成功開啟後, 另一邊就用sudo systemctl start 的方式啟動就好
 
 #### 驗證同步
-show STATUS LIKE 'wsrep%'
+
+```sql
+show STATUS LIKE 'wsrep%';
 SHOW STATUS LIKE "wsrep_cluster_size";
 show STATUS LIKE "wsrep_cluster_status";
 show STATUS LIKE "wsrep_local_state_comment";
+```
 
 踩坑紀錄
-galera mysql cluster 故障node再次接入集群遇到的問題 
-- http://blog.itpub.net/133735/viewspace-2140548/
-```
+galera mysql cluster 故障node再次接入集群遇到的問題
+
+- <http://blog.itpub.net/133735/viewspace-2140548/>
+
+```txt
 結論 避開這個問題的方法 就是 機器的配置 wsrep-cluster-address 的選項裡, 本機的ip不要放在第一位
 ```
 
 重新啟動同步, 失敗的處理方式
-- https://www.cnblogs.com/nulige/articles/8470001.html
+
+- <https://www.cnblogs.com/nulige/articles/8470001.html>
 
 常用的除錯指令:
 
 show full processlist 可以看到所有連接的情况, 但是大多連接的 state 其實是 Sleep 的, 空閒的狀態, 没有太多問題
 
 過濾sleep的狀態
-select id, db, user, host, command, time, state, info from information_schema.processlist where command != 'Sleep' order by time desc 
+select id, db, user, host, command, time, state, info from information_schema.processlist where command != 'Sleep' order by time desc
 
 id - process ID (可以用：kill id)
 command - 當下執行的命令, 比如最常見的:Sleep, Query, Connect...
@@ -96,7 +106,7 @@ explain 分析一下 SQL 語法
 
 Command 的值：
 
-```
+```txt
 Binlog Dump: 主node正在將二進位日志, 同步到从node
 Change User: 正在執行一個change-user的操作
 Close Stmt: 正在關閉一個Prepared Statement对象
@@ -129,7 +139,7 @@ Time: Unused
 情況2 當整個DB集合關閉的時候, 選一個當頭, 修改grastate.dat的內容, 把seqno改1, 執行galera_new_cluster
 其他的節點systemctl start mariadb
 
-```
+```bash
 vi grastate.dat
 
 # GALERA saved state
@@ -141,22 +151,25 @@ safe_to_bootstrap: 0
 
 情況3 當主要頭的DB關閉的時候, 請去其他節點, 修改grastate.dat的內容, safe_to_bootstrap: 0 改 1, 強行當頭同步
 
-
 ## Table Metadata Lock
 
-
 - 1. 有大query卡住, 阻塞DDL, 阻塞所有同表的後續操作
-```
+
+```txt
 show processlist
 kill掉DDL的session
 ```
+
 - 2. 沒有提交的commit, 阻塞DDL, 阻塞所有同表的後續操作
-```
+
+```txt
 select * from information_schema.innodb_trx\G
 找到未提交的sid, 然後kill掉
 ```
+
 - 3. 都沒有大query, 和沒提交的commit
-```
+
+```txt
 (該語法有執行完畢但是狀態是Sleep, 就是未提交, 就會看不到對應的trx_query)
 SELECT * FROM information_schema.innodb_trx;
 
@@ -177,6 +190,7 @@ show profile 和 show profiles 語句可以展示當前會話 (退出session後,
 Profiling 功能由MySQL會話變數: profiling控制, 預設是OFF 關閉狀態 select @@profiling; OR show variables like '%profi%';
 
 開啟Profiling功能：
+
 ```sql
 SET PROFILING = 1;
 ```
@@ -197,6 +211,7 @@ type={ALL|BLOCK IO|CONTEXT SWITCHES|CPU|IPC|MEMORY|PAGE FAULTS|SOURCE|SWAPS}
 ```
 
 已開啟連線數目
+
 ```sql
 SHOW STATUS LIKE '%connected';
 ```
