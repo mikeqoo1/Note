@@ -104,3 +104,9 @@ sudo dpkg -i 軟體套件名.deb
 ```
 
 ### system service
+
+### centos8 的自動補全功能
+
+```bash
+dnf install bash-completion -y
+```
