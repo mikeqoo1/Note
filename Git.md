@@ -109,3 +109,17 @@ git pull --prune --tags
 ```git
 git push origin --delete tag 標籤名
 ```
+
+## Git多個remote
+
+新增多個遠端倉庫
+
+```git
+git remote add 遠端名稱 新的遠端倉庫URL
+```
+
+一條指令同時推送到2個遠端地方
+
+```git
+git remote set-url --add origin 新的遠端倉庫URL
+```
