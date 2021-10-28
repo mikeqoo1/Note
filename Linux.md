@@ -110,3 +110,50 @@ sudo dpkg -i 軟體套件名.deb
 ```bash
 dnf install bash-completion -y
 ```
+
+### 建立SFTP
+
+- <https://www.opencli.com/linux/rhel-centos-7-install-sftp>
+
+建立帳號, 設定目錄, 調整權限, 修改SSH的設定檔
+
+```bash
+sudo adduser NEW_USER
+```
+
+```bash
+sudo passwd NEW_USER
+```
+
+```bash
+sudo mkdir -p SFTP_DIRECTORY (ex:/var/sftp/abc)
+```
+
+```bash
+sudo chown root:root SFTP_DIRECTORY_ROOT (ex:/var/sftp)
+```
+
+```bash
+sudo chmod 755 SFTP_DIRECTORY_ROOT
+```
+
+```bash
+sudo chown newuser:newuser SFTP_DIRECTORY
+```
+
+```bash
+sudo vi /etc/ssh/sshd_config
+```
+
+ADD THIS --->
+
+```bash
+Match User newuser
+ForceCommand internal-sftp
+PasswordAuthentication yes
+ChrootDirectory SFTP_DIRECTORY_ROOT
+PermitTunnel no
+AllowAgentForwarding no
+AllowTcpForwarding no
+X11Forwarding no
+```
