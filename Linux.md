@@ -157,3 +157,8 @@ AllowAgentForwarding no
 AllowTcpForwarding no
 X11Forwarding no
 ```
+
+```bash
+
+sudo systemctl restart sshd
+```
