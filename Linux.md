@@ -159,6 +159,6 @@ X11Forwarding no
 ```
 
 ```bash
-
+重新啟動服務
 sudo systemctl restart sshd
 ```
