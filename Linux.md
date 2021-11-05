@@ -48,6 +48,48 @@ du -shc /home/Projects/*
 
 刪除假資料:sysbench --test=fileio --num-threads=20 --file-total-size=1G --file-test-mode=rndrw cleanup
 
+資料庫效能測試
+mysql.socket路徑 (預設:/var/lib/mysql/mysql.sock)
+先新建foo=>create database foo
+
+查看哪些lua腳本
+
+```bash
+rpm -ql sysbench | grep 'bin\|lua'  
+/usr/bin/sysbench
+/usr/share/sysbench/bulk_insert.lua
+/usr/share/sysbench/oltp_common.lua
+/usr/share/sysbench/oltp_delete.lua
+/usr/share/sysbench/oltp_insert.lua
+/usr/share/sysbench/oltp_point_select.lua
+/usr/share/sysbench/oltp_read_only.lua
+/usr/share/sysbench/oltp_read_write.lua
+/usr/share/sysbench/oltp_update_index.lua
+/usr/share/sysbench/oltp_update_non_index.lua
+/usr/share/sysbench/oltp_write_only.lua
+/usr/share/sysbench/select_random_points.lua
+/usr/share/sysbench/select_random_ranges.lua
+/usr/share/sysbench/tests/include/inspect.lua
+/usr/share/sysbench/tests/include/oltp_legacy/bulk_insert.lua
+/usr/share/sysbench/tests/include/oltp_legacy/common.lua
+/usr/share/sysbench/tests/include/oltp_legacy/delete.lua
+/usr/share/sysbench/tests/include/oltp_legacy/insert.lua
+/usr/share/sysbench/tests/include/oltp_legacy/oltp.lua
+/usr/share/sysbench/tests/include/oltp_legacy/oltp_simple.lua
+/usr/share/sysbench/tests/include/oltp_legacy/parallel_prepare.lua
+/usr/share/sysbench/tests/include/oltp_legacy/select.lua
+/usr/share/sysbench/tests/include/oltp_legacy/select_random_points.lua
+/usr/share/sysbench/tests/include/oltp_legacy/select_random_ranges.lua
+/usr/share/sysbench/tests/include/oltp_legacy/update_index.lua
+/usr/share/sysbench/tests/include/oltp_legacy/update_non_index.lua
+```
+
+先建立測試Table:sysbench --db-driver=mysql --mysql-user=帳號 --mysql-password=密碼 --mysql-socket=mysql.socket路徑 --mysql-db=資料庫 --range_size=100 --table_size=10000 --tables=2 --threads=1 --events=0 --time=60 --rand-type=uniform /usr/share/sysbench/oltp_read_only.lua prepare
+
+開始測試:sysbench --db-driver=mysql --mysql-user=帳號 --mysql-password=密碼 --mysql-socket=mysql.socket路徑 --mysql-db=資料庫 --range_size=100 --table_size=10000 --tables=2 --threads=1 --events=0 --time=60 --rand-type=uniform /usr/share/sysbench/oltp_read_only.lua run
+
+刪除假資料:sysbench --db-driver=mysql --mysql-user=帳號 --mysql-password=密碼 --mysql-socket=mysql.socket路徑 --mysql-db=資料庫 --range_size=100 --table_size=10000 --tables=2 --threads=1 --events=0 --time=60 --rand-type=uniform /usr/share/sysbench/oltp_read_only.lua cleanup
+
 ### CentOS8.x設定
 
 DNS設定
