@@ -138,6 +138,7 @@ SELINUX=disabled
 
 ## Haproxy2.4.8
 
+```ini
 wget <https://www.lua.org/ftp/lua-5.3.5.tar.gz>
 tar xzf lua-5.3.5.tar.gz
 cd lua-5.3.5
@@ -151,3 +152,4 @@ sudo yum install pcre-devel
 sudo dnf install systemd-devel
 make -j $(nproc) TARGET=linux-glibc USE_OPENSSL=1 USE_LUA=1 USE_PCRE=1 USE_SYSTEMD=1
 sudo make install
+```
