@@ -139,13 +139,13 @@ SELINUX=disabled
 ## Haproxy2.4.8
 
 ```ini
-wget <https://www.lua.org/ftp/lua-5.3.5.tar.gz>
+wget https://www.lua.org/ftp/lua-5.3.5.tar.gz
 tar xzf lua-5.3.5.tar.gz
 cd lua-5.3.5
 sudo dnf install readline-devel
 sudo make linux install
 
-wget <http://www.haproxy.org/download/2.4/src/haproxy-2.4.8.tar.gz>
+wget http://www.haproxy.org/download/2.4/src/haproxy-2.4.8.tar.gz
 tar xzf haproxy-2.4.8.tar.gz
 cd haproxy-2.4.8
 sudo yum install pcre-devel
