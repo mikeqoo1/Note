@@ -55,10 +55,14 @@ gpgkey=https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
 gpgcheck=1
 ```
 
+安裝步驟跟設定
+
+```ini
 sudo dnf install mariadb-server mariadb
 sudo systemctl start mariadb
 sudo systemctl status mariadb
 sudo mariadb-secure-installation
+```
 
 ### 同步設定
 
@@ -86,7 +90,9 @@ sudo vi /etc/my.cnf
 #
 !includedir /etc/my.cnf.d
 [mysqld]
-datadir                  = /database/mariadb
+character-set-server    = 'utf8mb4'
+collation-server        = 'utf8mb4_unicode_ci'
+#datadir                  = /database/mariadb
 binlog_format            = ROW
 default-storage-engine   = innodb
 innodb_autoinc_lock_mode = 2
@@ -106,18 +112,18 @@ wsrep_sst_method         = rsync
 
 # Galera Node Configuration
 wsrep_node_address       = "192.168.0.1"
-wsrep_node_address       = "node1"
+wsrep_node_name          = "node1"
 ```
 
 防火牆開啟
 
 ```ini
-sudo firewall-cmd –permanent –zone=public –add-port=3306/tcp
-sudo firewall-cmd –permanent –zone=public –add-port=4567/tcp
-sudo firewall-cmd –permanent –zone=public –add-port=4568/tcp
-sudo firewall-cmd –permanent –zone=public –add-port=4444/tcp
-sudo firewall-cmd –permanent –zone=public –add-port=4567/udp
-sudo firewall-cmd –reload
+sudo firewall-cmd --permanent --zone=public --add-port=3306/tcp
+sudo firewall-cmd --permanent --zone=public --add-port=4567/tcp
+sudo firewall-cmd --permanent --zone=public --add-port=4568/tcp
+sudo firewall-cmd --permanent --zone=public --add-port=4444/tcp
+sudo firewall-cmd --permanent --zone=public --add-port=4567/udp
+sudo firewall-cmd --reload
 ```
 
 關閉SELINUX
@@ -125,7 +131,23 @@ sudo firewall-cmd –reload
 vi /etc/selinux/config
 
 ```ini
-SELINUX=diabled
+SELINUX=disabled
 ```
 
 第一台的啟動 sudo galera_new_cluster 其他 sudo systemctl start mariadb
+
+## Haproxy2.4.8
+
+wget <https://www.lua.org/ftp/lua-5.3.5.tar.gz>
+tar xzf lua-5.3.5.tar.gz
+cd lua-5.3.5
+sudo dnf install readline-devel
+sudo make linux install
+
+wget <http://www.haproxy.org/download/2.4/src/haproxy-2.4.8.tar.gz>
+tar xzf haproxy-2.4.8.tar.gz
+cd haproxy-2.4.8
+sudo yum install pcre-devel
+sudo dnf install systemd-devel
+make -j $(nproc) TARGET=linux-glibc USE_OPENSSL=1 USE_LUA=1 USE_PCRE=1 USE_SYSTEMD=1
+sudo make install
