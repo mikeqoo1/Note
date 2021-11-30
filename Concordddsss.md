@@ -98,6 +98,10 @@ default-storage-engine   = innodb
 innodb_autoinc_lock_mode = 2
 bind-address             = 0.0.0.0
 
+wait_timeout            = 86400   # 24 hr
+interactive_timeout     = 86400
+max_allowed_packet      = 67108864 #64M
+
 general_log              = 1
 general_log_file         = /var/lib/mysql/mariadb.log
 
@@ -107,6 +111,11 @@ long_query_time          = 3 #執行超過3秒
 
 log-error                = /var/lib/mysql/error.log
 expire_logs_days         = 7 #保留7天
+
+innodb_use_native_aio       = ON #Linux default=ON
+innodb_read_io_threads      = 16
+innodb_write_io_threads     = 16
+innodb_thread_concurrency   = 64 # default=0 表示不限制
 
 # Galera Provider Configuration
 [galera]
