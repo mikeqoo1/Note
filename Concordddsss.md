@@ -93,6 +93,7 @@ sudo vi /etc/my.cnf
 character-set-server    = 'utf8mb4'
 collation-server        = 'utf8mb4_unicode_ci'
 #datadir                  = /database/mariadb
+skip_character_set_client_handshake = 1   #跳過mysql登入時候的字符集參數設定 使用Server端的設定
 binlog_format            = ROW
 default-storage-engine   = innodb
 innodb_autoinc_lock_mode = 2
@@ -101,6 +102,7 @@ bind-address             = 0.0.0.0
 wait_timeout            = 86400   # 24 hr
 interactive_timeout     = 86400
 max_allowed_packet      = 67108864 #64M
+net_buffer_length = 65536
 
 general_log              = 1
 general_log_file         = /var/lib/mysql/mariadb.log
