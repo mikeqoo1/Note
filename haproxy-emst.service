@@ -1,0 +1,19 @@
+[Unit]
+Description=HAProxy Load Balancer
+After=syslog.target
+After=network.target
+
+[Service]
+Environment="CONFIG=/etc/haproxy/haproxy-emst.cfg"
+Environment="PIDFILE=/run/haproxy-emst.pid"
+
+ExecStartPre=/usr/local/sbin/haproxy -f $CONFIG -c -q
+ExecStart=/usr/local/sbin/haproxy -W -q -f $CONFIG -p $PIDFILE
+ExecReload=/usr/local/sbin/haproxy -f $CONFIG -c -q
+ExecReload=/bin/kill -USR2 $MAINPID
+KillMode=mixed
+Restart=always
+Type=forking
+
+[Install]
+WantedBy=multi-user.target

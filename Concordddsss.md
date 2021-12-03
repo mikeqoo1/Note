@@ -173,3 +173,15 @@ sudo dnf install systemd-devel
 make -j $(nproc) TARGET=linux-glibc USE_OPENSSL=1 USE_LUA=1 USE_PCRE=1 USE_SYSTEMD=1
 sudo make install
 ```
+
+haproxy檢查與重啟概念
+
+```bash
+haproxy -v  #Version
+haproxy -f /etc/haproxy/haproxy.cfg -c  #檢查
+service haproxy restart
+
+sudo groupadd haproxy #建立帳號和群組
+sudo useradd -g haproxy haproxy
+sudo mkdir /var/lib/haproxy
+```
