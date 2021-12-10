@@ -108,7 +108,7 @@ general_log              = 1
 general_log_file         = /var/lib/mysql/mariadb.log
 
 slow_query_log           = 1 #0=關閉 1=打開
-slow_query_log           = /var/lib/mysql/query_slow.log
+slow_query_log_file      = /var/lib/mysql/query_slow.log
 long_query_time          = 3 #執行超過3秒
 
 log-error                = /var/lib/mysql/error.log
