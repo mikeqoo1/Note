@@ -29,4 +29,4 @@ ssh-keygen -t rsa -b 4096 -C "你的信箱"
 
 ## [康x](Concordddsss.md)
 
-## [Intel] (Intel.md)
+## [Intel](Intel.md)
