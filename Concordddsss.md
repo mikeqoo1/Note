@@ -119,6 +119,8 @@ innodb_read_io_threads      = 16
 innodb_write_io_threads     = 16
 innodb_thread_concurrency   = 64 # default=0 表示不限制
 
+wsrep_provider_options="gcache.size=1024M"
+
 # Galera Provider Configuration
 [galera]
 wsrep_on                 = ON
