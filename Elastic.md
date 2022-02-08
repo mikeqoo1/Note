@@ -186,3 +186,9 @@ Access the ELK dashboard on your web browser at http://server-IP:5601
 ## 參考
 
 - [參考](https://www.golinuxcloud.com/install-elk-stack-on-rocky-linux-8/)
+
+### Filebeat 設定
+
+- sudo vim /etc/filebeat/filebeat.yml
+
+- Filebeat inputs 加入log路徑, 用 Logstash Output 當輸出
