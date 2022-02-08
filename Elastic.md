@@ -192,3 +192,5 @@ Access the ELK dashboard on your web browser at http://server-IP:5601
 - sudo vim /etc/filebeat/filebeat.yml
 
 - Filebeat inputs 加入log路徑, 用 Logstash Output 當輸出
+
+- [參考](https://www.cnblogs.com/zsql/p/13137833.html)
