@@ -212,7 +212,10 @@ sudo docker-compose up # 啟動
 ## podman 的啟動
 
 ```bash
-podman pod create -n concords -p 10022:22 -p 10080:80 -p 10443:443
+
+有待更新 確認
+
+sudo podman pod create -n concords --network podman -p 10022:22 -p 10080:80 -p 10443:443
 
 sudo podman run --cap-add=AUDIT_WRITE --pod concords --name gitlab-postgresql -d \
     --env 'DB_NAME=gitlabhq_production' \
@@ -225,8 +228,7 @@ sudo podman run --pod concords --name gitlab-redis -d \
     --volume /srv/docker/gitlab/redis:/data \
     redis:6.2
 
-sudo podman run --cap-add=AUDIT_WRITE --pod concords --name gitlab -d \
-    --publish 10022:22 --publish 10080:80 --publish 10443:443\
+sudo podman run --cap-add=AUDIT_WRITE --pod concords --add-host=192.168.199.236 --name gitlab -d \
     --env 'GITLAB_HOST=192.168.199.236' \
     --env 'GITLAB_SSH_PORT=10022' --env 'GITLAB_PORT=10443' \
     --env 'GITLAB_HTTPS=true' --env 'SSL_SELF_SIGNED=true' \
@@ -234,5 +236,4 @@ sudo podman run --cap-add=AUDIT_WRITE --pod concords --name gitlab -d \
     --env 'GITLAB_SECRETS_SECRET_KEY_BASE=long-and-random-alpha-numeric-string' \
     --env 'GITLAB_SECRETS_OTP_KEY_BASE=long-and-random-alpha-numeric-string' \
     --volume /srv/docker/gitlab/gitlab:/home/git/data sameersbn/gitlab:14.8.2
-
 ```
