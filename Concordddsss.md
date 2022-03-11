@@ -187,3 +187,53 @@ sudo groupadd haproxy #建立帳號和群組
 sudo useradd -g haproxy haproxy
 sudo mkdir /var/lib/haproxy
 ```
+
+## GitLab
+
+```bash
+# 1.產生private key
+openssl genrsa -out gitlab.key 2048
+# 2.某某vm或服務(例如:iis、apache)產生certificate signing request (CSR)
+openssl req -new -key gitlab.key -out gitlab.csr
+# 3.作簽章(用private key對CSR作簽章)
+openssl x509 -req -days 3650 -in gitlab.csr -signkey gitlab.key -out gitlab.crt
+# 4. 產生stronger DHE parameters 
+openssl dhparam -out dhparam.pem 2048
+sudo mkdir -p /srv/docker/gitlab/gitlab/certs # 這是host的目錄喔，會對到gitlab的/home/git/data
+sudo mkdir -p /srv/docker/gitlab/postgresql
+sudo mkdir -p /srv/docker/gitlab/redis
+sudo cp gitlab.key /srv/docker/gitlab/gitlab/certs/
+sudo cp gitlab.crt /srv/docker/gitlab/gitlab/certs/
+sudo cp dhparam.pem /srv/docker/gitlab/gitlab/certs/
+sudo chmod 400 /srv/docker/gitlab/gitlab/certs/gitlab.key # read
+sudo docker-compose up # 啟動
+```
+
+## podman 的啟動
+
+```bash
+
+有待更新 確認
+
+sudo podman pod create -n concords --network podman -p 10022:22 -p 10080:80 -p 10443:443
+
+sudo podman run --cap-add=AUDIT_WRITE --pod concords --name gitlab-postgresql -d \
+    --env 'DB_NAME=gitlabhq_production' \
+    --env 'DB_USER=gitlab' --env 'DB_PASS=password' \
+    --env 'DB_EXTENSION=pg_trgm' \
+    --volume /srv/docker/gitlab/postgresql:/var/lib/postgresql \
+    sameersbn/postgresql:12-20200524
+
+sudo podman run --pod concords --name gitlab-redis -d \
+    --volume /srv/docker/gitlab/redis:/data \
+    redis:6.2
+
+sudo podman run --cap-add=AUDIT_WRITE --pod concords --add-host=192.168.199.236 --name gitlab -d \
+    --env 'GITLAB_HOST=192.168.199.236' \
+    --env 'GITLAB_SSH_PORT=10022' --env 'GITLAB_PORT=10443' \
+    --env 'GITLAB_HTTPS=true' --env 'SSL_SELF_SIGNED=true' \
+    --env 'GITLAB_SECRETS_DB_KEY_BASE=long-and-random-alpha-numeric-string' \
+    --env 'GITLAB_SECRETS_SECRET_KEY_BASE=long-and-random-alpha-numeric-string' \
+    --env 'GITLAB_SECRETS_OTP_KEY_BASE=long-and-random-alpha-numeric-string' \
+    --volume /srv/docker/gitlab/gitlab:/home/git/data sameersbn/gitlab:14.8.2
+```
