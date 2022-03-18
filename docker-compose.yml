@@ -39,9 +39,9 @@ services:
     - redis
     - postgresql
     ports:
-    - "10080:80"
-    - "10022:22"
-    - "10443:443"
+    - "30080:80"
+    - "30022:22"
+    - "30000:443"
     volumes:
     - /srv/docker/gitlab/gitlab:/home/git/data:Z
     healthcheck:
@@ -69,8 +69,8 @@ services:
     - SSL_SELF_SIGNED=true
 
     - GITLAB_HOST=192.168.199.236
-    - GITLAB_PORT=10443
-    - GITLAB_SSH_PORT=10022
+    - GITLAB_PORT=30000
+    - GITLAB_SSH_PORT=30022
     - GITLAB_RELATIVE_URL_ROOT=
     - GITLAB_SECRETS_DB_KEY_BASE=long-and-random-alphanumeric-string
     - GITLAB_SECRETS_SECRET_KEY_BASE=long-and-random-alphanumeric-string
@@ -82,18 +82,18 @@ services:
     - GITLAB_NOTIFY_ON_BROKEN_BUILDS=true
     - GITLAB_NOTIFY_PUSHER=false
 
-    - GITLAB_EMAIL=notifications@example.com
+    - GITLAB_EMAIL=110084@concords.com.tw
     - GITLAB_EMAIL_REPLY_TO=noreply@example.com
     - GITLAB_INCOMING_EMAIL_ADDRESS=reply@example.com
 
     - GITLAB_BACKUP_SCHEDULE=daily
     - GITLAB_BACKUP_TIME=01:00
 
-    - SMTP_ENABLED=false
-    - SMTP_DOMAIN=www.example.com
+    - SMTP_ENABLED=true
+    - SMTP_DOMAIN=exgmail.concords.com.tw
     - SMTP_HOST=smtp.gmail.com
-    - SMTP_PORT=587
-    - SMTP_USER=mailer@example.com
+    - SMTP_PORT=25
+    - SMTP_USER=gitlab@concords.com.tw
     - SMTP_PASS=password
     - SMTP_STARTTLS=true
     - SMTP_AUTHENTICATION=login
