@@ -204,3 +204,13 @@ X11Forwarding no
 重新啟動服務
 sudo systemctl restart sshd
 ```
+
+### 小指令集合
+
+```bash
+查看目錄大小
+du -chd 1 | sort -h
+
+顯示秒數
+ls -l --time-style='+%H:%M:%S'
+```
