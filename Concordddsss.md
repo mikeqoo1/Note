@@ -95,31 +95,43 @@ collation-server        = 'utf8mb4_unicode_ci'
 #datadir                  = /database/mariadb
 skip_character_set_client_handshake = 1   #跳過mysql登入時候的字符集參數設定 使用Server端的設定
 binlog_format            = ROW
+#binlog_format            = MIXED
+# 基於語句紀錄： STATEMENT，只紀錄語句。該模式存在弊端，比如執行"UPDATE students SET birth = now();"無法保存具体的時間戳記，若按照該語句進行還原準確性肯定出現問題。
+# 基於行紀錄：ROW，只紀錄數據，即直接將數據存下来，但檔案大小較大。適合資料相對重要的場景。資料恢复時準確性的最高，但需要犧牲更多的硬碟空間。
+# 混合模式： MIXED 系统自行判定該用哪個方式存
+#MariaDB 5.5.x默認STATEMENT, 而MariaDB 10.2.x默認MIXED
 default-storage-engine   = innodb
 innodb_autoinc_lock_mode = 2
 bind-address             = 0.0.0.0
 
-wait_timeout            = 86400   # 24 hr
+wait_timeout            = 86400   #24hr
 interactive_timeout     = 86400
 max_allowed_packet      = 67108864 #64M
-net_buffer_length = 65536
+net_buffer_length       = 65536
 
 general_log              = 1
 general_log_file         = /var/lib/mysql/mariadb.log
 
 slow_query_log           = 1 #0=關閉 1=打開
 slow_query_log_file      = /var/lib/mysql/query_slow.log
-long_query_time          = 3 #執行超過3秒
+long_query_time          = 0.1 #執行超過0.1秒
 
 log-error                = /var/lib/mysql/error.log
-expire_logs_days         = 7 #保留7天
+log_bin_trust_function_creators = 1
+log_bin                  = /var/lib/mysql/mariadb_bin.log
+max_binlog_size          = 1073741824 #log大小
+sync_binlog              = 0 #設定是否啟動binlog即时同步硬碟功能，默認0，由操作系统負責同步log到硬碟
+expire_logs_days         = 3 #保留3天
+
+max_connections             = 8192
 
 innodb_use_native_aio       = ON #Linux default=ON
 innodb_read_io_threads      = 16
 innodb_write_io_threads     = 16
-innodb_thread_concurrency   = 64 # default=0 表示不限制
+innodb_thread_concurrency   = 64 #default=0 表示不限制
 
 wsrep_provider_options="gcache.size=1024M"
+wsrep_provider_options="repl.max_ws_size=2147483647"
 
 # Galera Provider Configuration
 [galera]
