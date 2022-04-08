@@ -95,7 +95,7 @@ sudo vim /etc/elasticsearch/elasticsearch.yml
 啟動
 sudo systemctl enable --now elasticsearch.service
 
-檢查
+檢查服務
 systemctl status elasticsearch
 ```
 
@@ -131,7 +131,7 @@ output {
 sudo systemctl enable --now logstash
 
 檢查
-sudo systemctl status  logstash
+sudo systemctl status logstash
 ```
 
 ## Step-3: Install and Configure Kibana
@@ -193,4 +193,71 @@ Access the ELK dashboard on your web browser at http://server-IP:5601
 
 - Filebeat inputs 加入log路徑, 用 Logstash Output 當輸出
 
+- 記得重新啟動 sudo systemctl restart filebeat
+
 - [參考](https://www.cnblogs.com/zsql/p/13137833.html)
+
+
+### 安全性設定
+
+增加安全性設定 (在elasticsearch.yml中加入以下配置)
+
+```bash
+xpack.security.enabled: true
+xpack.license.self_generated.type: basic
+xpack.security.transport.ssl.enabled: true
+```
+
+elasticsearch自動產生密碼 (手動是sudo ./elasticsearch-setup-passwords interactive)
+
+```bash
+mike @ /usr/share/elasticsearch/bin on ⎇   $ sudo ./elasticsearch-setup-passwords auto
+
+Initiating the setup of passwords for reserved users elastic,apm_system,kibana,kibana_system,logstash_system,beats_system,remote_monitoring_user.
+The passwords will be randomly generated and printed to the console.
+Please confirm that you would like to continue [y/N]y
+
+Changed password for user apm_system
+PASSWORD apm_system = SfDoqSDmjnAWiDIq3GoV
+
+Changed password for user kibana_system
+PASSWORD kibana_system = ZrnJHy4yWJRRfuThYcQv
+
+Changed password for user kibana
+PASSWORD kibana = ZrnJHy4yWJRRfuThYcQv
+
+Changed password for user logstash_system
+PASSWORD logstash_system = lLUyZMKvO4wiYLIA0Gxn
+
+Changed password for user beats_system
+PASSWORD beats_system = 54kjV0nKzxwje3jfZMmQ
+
+Changed password for user remote_monitoring_user
+PASSWORD remote_monitoring_user = gT45kMa434IKyTERTPlq
+
+Changed password for user elastic
+PASSWORD elastic = AJK2X2Dr1O2lrOIUhL2N
+```
+
+Kibana 添加用户
+
+```bash
+sudo vim /etc/kibana/kibana.yml
+
+修改這個的密碼
+elasticsearch.username: "kibana_system"
+elasticsearch.password: "pass"
+```
+
+安裝metricbeat
+curl -L -O https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-7.16.3-x86_64.rpm
+sudo yum install metricbeat-7.16.3-x86_64.rpm
+sudo systemctl start metricbeat
+sudo systemctl enable metricbeat
+
+安裝APM Server
+curl -L -O https://artifacts.elastic.co/downloads/apm-server/apm-server-7.16.3-x86_64.rpm
+sudo yum install apm-server-7.16.3-x86_64.rpm
+sudo systemctl start apm-server
+sudo systemctl enable apm-server
+
