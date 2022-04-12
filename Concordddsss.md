@@ -249,3 +249,41 @@ sudo podman run --cap-add=AUDIT_WRITE --pod concords --add-host=192.168.199.236 
     --env 'GITLAB_SECRETS_OTP_KEY_BASE=long-and-random-alpha-numeric-string' \
     --volume /srv/docker/gitlab/gitlab:/home/git/data sameersbn/gitlab:14.8.2
 ```
+
+### 母親節禮物
+
+先啟動
+
+```txt
+sudo podman run --name mother_gift -d -p 9104:9104 -e DATA_SOURCE_NAME="exporter:Aa1234@(EMST-Test03:3306)/" prom/mysqld-exporter
+```
+
+找容器內部的ip
+
+```txt
+sudo podman inspect mother_gift | grep IPAddress
+            "IPAddress": "10.88.2.37",
+                    "IPAddress": "10.88.2.37"
+```
+
+要用這個IP去建立DB User
+
+```txt
+CREATE USER exporter@10.88.2.37 IDENTIFIED BY 'Aa1234' WITH MAX_USER_CONNECTIONS 3;
+grant ALL PRIVILEGES on *.* to 'exporter'@'10.88.2.37'
+```
+
+先認識Bridge 
+
+- https://www.cnblogs.com/bakari/p/10529575.html
+
+Podman網路說明
+
+- https://www.i4k.xyz/article/chenmozhe22/113941733
+
+- https://blog.csdn.net/omaidb/article/details/121091789
+
+- https://docs.podman.io/en/latest/markdown/podman-network-create.1.html
+
+- https://podman.io/getting-started/
+
