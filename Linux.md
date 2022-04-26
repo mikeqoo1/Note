@@ -214,3 +214,17 @@ du -chd 1 | sort -h
 顯示秒數
 ls -l --time-style='+%H:%M:%S'
 ```
+
+### objdump 反編譯
+
+### nc (netcat)
+
+當一個簡單的TCP Server
+nc -l port
+
+當一個簡單的TCP Client
+nc ip port
+
+https://blog.gtwang.org/linux/linux-utility-netcat-examples/
+https://myapollo.com.tw/zh-tw/linux-command-nc/
+https://kknews.cc/zh-tw/code/ky8r8z8.html
