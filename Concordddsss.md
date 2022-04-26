@@ -266,6 +266,10 @@ sudo podman inspect mother_gift | grep IPAddress
                     "IPAddress": "10.88.2.37"
 ```
 
+
+docker run -d -p 9104:9104 --network my-mysql-network  -e DATA_SOURCE_NAME="exporter:Aa1234@(192.168.199.235:3306)/" prom/mysqld-exporter
+
+
 要用這個IP去建立DB User
 
 ```txt
