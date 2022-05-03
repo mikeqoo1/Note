@@ -110,4 +110,51 @@ tiup cluster display tidb-test
 ```
 
 
+TiDB Lightning原理
+
+導入模式(TiDB Lightning 會自動把 TiKV切換成這個模式 會影響寫入效率)
+
+建立schema和表
+
+分割表
+
+讀取SQL dump
+
+寫入本地臨時存取文件
+
+寫入資料到TiKV集群
+
+檢查和分析
+
+普通模式
+
+有3種模式 local-backend(最快 最耗資源 版本要4.0.0以上 不支持事務 table不可以有資料) importer-backend(中間 資源還好 版本都可以 需要多安裝tikv-importer 不支持事務 table不可以有資料) TiDB-backend(最慢 最不耗資源 版本要都可以 支持事務 table可以有資料)
+
+很吃硬體, 建議單獨部屬Lightning
+
+-------
+
+TiDB Data Migration (DM)
+
+兼容MySQL的數據遷移工具, 支持全量傳遞跟增量的同步(異步的遷移, 不能即時呈現改變), 可以操作表與操作(只要Insert 不要 delete)的過濾
+
+
+DM-Master(高可用的節點, 協調Worker的任務)  <--  dmctl(操作管理DM)
+    |
+    |
+    |
+    V
+DM-Worker(負責搬運資料的, 一個Worker對一個資料庫)
+
+產生設定檔
+tiup dm template > xxx.yaml
+
+部署dm
+tiup dm deplay ${name} ${version} ./xxx.yaml --user root -P
+
+列出dm版本
+tiup list dm_master
+
+啟動dm
+tiup dm start ${name}
 
