@@ -110,7 +110,7 @@ tiup cluster display tidb-test
 ```
 
 
-TiDB Lightning原理
+TiDB Lightning原理 高速導入資料到TiDB
 
 導入模式(TiDB Lightning 會自動把 TiKV切換成這個模式 會影響寫入效率)
 
@@ -157,4 +157,22 @@ tiup list dm_master
 
 啟動dm
 tiup dm start ${name}
+
+dm的配置
+
+表的過濾 操作的過濾 表的路由
+
+Mysql同步到TiDB(用TiDM)
+
+https://docs.pingcap.com/zh/tidb/stable/migrate-data-using-dm#%E7%AC%AC-4-%E6%AD%A5%E9%85%8D%E7%BD%AE%E4%BB%BB%E5%8A%A1
+
+https://docs.pingcap.com/zh/tidb/stable/quick-start-create-task
+
+
+TiDB Binlog 收集TiDB的binlog,提供備份跟同步 5.0之後建議使用TiCDC 這個不要用
+
+資料同步：同步TiDB集群資料到到其他資料庫
+定時備份和恢復：備份TiDB集群資料, 與可以用來修復資料集群資料
+
+TiCDC
 
