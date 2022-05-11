@@ -1,0 +1,30 @@
+# ----------- 全局配置 -----------
+## ********* 基本信息配置 *********
+name: test234             # 任务名称，需要全局唯一 多个同时运行的任务不能重名
+task-mode: all            # 任务模式，可设为 "full"、"incremental"、全量+增量 (all) 迁移模式。
+
+target-database:       # 下游 TiDB 配置信息
+  host: "192.168.199.234"
+  port: 4000
+  user: "root"
+  password: ""         # 如果不为空则需经过 dmctl 加密
+
+## ******** 功能配置集 **********
+block-allow-list:        # 上游数据库实例匹配的表的 block & allow list 过滤规则集，如果 DM 版本 <= v1.0.6 则使用 black-white-list
+  bw-rule-1:             # 黑白名单配置的名称
+    do-dbs: ["CRCFT"]    # 迁移哪些库
+    ignore-dbs: ["foo", "sys", "test", "mysql", "CRCFT_History", "Finance", "Finance_History", "IMMonitoringU"] # 忽略哪些库
+    do-tables:                       # 迁移哪些表
+    - db-name: "CRCFT"
+      tbl-name: "OrderReport"
+    - db-name: "CRCFT"
+      tbl-name: "TradeReport"
+    - db-name: "CRCFT"
+      tbl-name: "OrderRecord"
+# ----------- 实例配置 -----------
+mysql-instances:
+  - source-id: "mysql-234"  # 上游实例或者复制组 ID，参考 `dm-master.toml` 的 `source-id` 配置
+    block-allow-list:  "bw-rule-1" # 黑白名单配置名称，如果 DM 版本 <= v1.0.6 则使用 black-white-list
+    mydumper-thread: 4             # dump 处理单元用于导出数据的线程数量，在 v1.0.2 版本引入
+    loader-thread: 16              # load 处理单元用于导入数据的线程数量，在 v1.0.2 版本引入
+    syncer-thread: 16              # sync 处理单元用于复制增量数据的线程数量，在 v1.0.2 版本引入
