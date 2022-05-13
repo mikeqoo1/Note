@@ -1,0 +1,31 @@
+# ----------- 全局配置 -----------
+## ********* 基本信息配置 *********
+name: test234             # 任務名稱，需要全局唯一 多個同時運行的任務不能重名
+task-mode: all            # 任務模式，可設為 "full"、"incremental"、全量+增量 (all) 遷移模式。
+
+target-database:       # 下游 TiDB 配置信息
+  host: "192.168.199.234"
+  port: 4000
+  user: "root"
+  password: ""         # 如果不為空則需經過 dmctl 加密
+
+## ******** 功能配置集 **********
+
+#將根據 schema-pattern/table-pattern 匹配上該規則的上游 MySQL/MariaDB 實例的Table遷移到下游的 target-schema/target-table。
+
+
+block-allow-list:        # 上游資料庫實例匹配的Table的 block & allow list 过滤規則集，如果 DM 版本 <= v1.0.6 則使用 black-white-list
+  bw-rule-1:             # 黑白名单配置的名稱
+    do-dbs: ["test"]    # 遷移哪些資料庫 支持通配符 "*" 和 "?"，do-dbs 和 ignore-dbs 只需要配置一個，如果兩者同時配置只有 do-dbs 会生效
+    ignore-dbs: ["CRCFT", "CRCFT_History", "Finance", "Finance_History", "IMMonitoringU"] # 忽略哪些資料庫
+  do-tables:                       # 遷移哪些Table，do-tables 和 ignore-tables 只需要配置一個，如果兩者同時配置只有 do-tables 会生效
+  - db-name: "test"
+    tbl-name: "t1"
+# ----------- 實例配置 -----------
+mysql-instances:
+  - source-id: "mysql-234"  # 上游實例或者複製组 ID，参考 `dm-master.toml` 的 `source-id` 配置
+    block-allow-list: "bw-rule-1"                   # 該上游資料庫實例匹配的Table的 block-allow-list 过滤規則名稱，如果 DM 版本早於 v2.0.0-beta.2 則使用 black-white-list
+    mydumper-thread: 4             # dump 處理單元用於導出的thread數量，在 v1.0.2 版本引入
+    loader-thread: 16              # load 處理單元用於導入的thread數量，在 v1.0.2 版本引入
+    syncer-thread: 16              # sync 處理單元用於複製增量的thread數量，在 v1.0.2 版本引入
+

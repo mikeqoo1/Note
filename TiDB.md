@@ -206,6 +206,7 @@ purge:
 
 10. 監控跟查log 192.168.199.236:3000 => Grafana
 
+跳過錯誤 tiup dmctl --master-addr 192.168.199.236:8261 handle-error test234 skip
 
 
 
