@@ -134,7 +134,7 @@ TiDB Lightning原理 高速導入資料到TiDB
 
 -------
 
-TiDB Data Migration (DM)
+TiDB Data Migration (DM) 很重要
 
 兼容MySQL的數據遷移工具, 支持全量傳遞跟增量的同步(異步的遷移, 不能即時呈現改變), 可以操作表與操作(只要Insert 不要 delete)的過濾
 
@@ -167,6 +167,48 @@ Mysql同步到TiDB(用TiDM)
 https://docs.pingcap.com/zh/tidb/stable/migrate-data-using-dm#%E7%AC%AC-4-%E6%AD%A5%E9%85%8D%E7%BD%AE%E4%BB%BB%E5%8A%A1
 
 https://docs.pingcap.com/zh/tidb/stable/quick-start-create-task
+
+
+![實際操作](TiDM實際操作流程.png)
+
+1. 先確認MariaDB的設定 是否設定 server_id binlog要開且設定要長這樣binlog_format=ROW跟binlog_row_image=FULL DM工具只支持這2個
+
+2. 建立MariaDB的帳號給DMworker用
+
+3. 安裝DM群集 (看官方文件 一下上手)
+
+4. 配置DM連MariaDB的設定檔
+
+```ini
+source-id: "mysql-234"    # 数据源 ID，在数据迁移任务配置和 dmctl 命令行中引用该 source-id 可以关联到对应的数据源
+
+from:
+  host: "192.168.199.234"
+  port: 3306
+  user: "syncer"
+  password: "EejxfhQDBMnL5MNqFglnPkDD52fxWhQ=" # 推荐使用 dmctl 对上游数据源的用户密码加密之后的密碼
+
+purge:
+  interval: 3600
+  expires: 8
+  remain-space: 10
+```
+
+5. 配置同步任务 (TiDM任務配置.yaml)
+
+6. 檢查任務配置設定 tiup dmctl --master-addr 192.168.199.236:8261 check-task task234.yaml
+
+7. 啟動任務 tiup dmctl --master-addr 192.168.199.236:8261 start-task task234.yaml
+
+8. 查詢任務 tiup dmctl --master-addr 192.168.199.236:8261 query-status
+
+9. 停止任務 tiup dmctl --master-addr 192.168.199.236:8261 stop-task test234 (用任務配置的name)
+
+10. 監控跟查log 192.168.199.236:3000 => Grafana
+
+跳過錯誤 tiup dmctl --master-addr 192.168.199.236:8261 handle-error test234 skip
+
+
 
 
 TiDB Binlog 收集TiDB的binlog,提供備份跟同步 5.0之後建議使用TiCDC 這個不要用
