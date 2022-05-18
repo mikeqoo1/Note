@@ -175,4 +175,19 @@ TiDB Binlog 收集TiDB的binlog,提供備份跟同步 5.0之後建議使用TiCDC
 定時備份和恢復：備份TiDB集群資料, 與可以用來修復資料集群資料
 
 TiCDC
+TiDB binlog是從TiDB Server的日誌來實現同步, TiCDC是直接抽取TiKV的變更日誌來實現同步或還原數據
+
+1. 高可用
+2. 性能(官方:同步延遲大約3秒內, 也是異步的同步)
+3. 支持多元的數據格式
+
+適合在TiDB同步支持MySQL的任何資料庫和Kafka
+用來訂閱特定資料或操作
+
+TiCDC只能同步至少存在一個有效索引的表
+
+1. 主鍵(Primary Key)為有效索引
+2. 同時滿足下列條件的唯一索引(UNIQUE INDEX)為有效索引
+ - 索引中每一列的結構中明確定義非空(NOT NULL)
+ - 索引中不存在虛擬生成列(VIRTUAL GENERATED COLUMNS)
 
