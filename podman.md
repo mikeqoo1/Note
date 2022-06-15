@@ -1,5 +1,4 @@
-
-
+# Podman
 
 podman run \
   --name gitlabtest \
@@ -11,6 +10,23 @@ podman run \
   --volume /srv/gitlab/logs:/var/log/gitlab:Z \
   --volume /srv/gitlab/data:/var/opt/gitlab:Z \
   docker.io/gitlab/gitlab-ee
+
+
+export GITLAB_HOME=/opt/gitlab
+sudo mkdir -p $GITLAB_HOME
+sudo mkdir $GITLAB_HOME/data $GITLAB_HOME/config $GITLAB_HOME/logs
+podman run --detach \
+  --privileged \
+  --hostname 192.168.199.234 \
+  --publish 30443:443 \
+  --publish 30000:80 \
+  --publish 30022:22 \
+  --name gitlab \
+  --volume /opt/gitlab/config:/etc/gitlab \
+  --volume /opt/gitlab/logs:/var/log/gitlab \
+  --volume /opt/gitlab/data:/var/opt/gitlab \
+  gitlab/gitlab-ee:latest
+
 
 
 
