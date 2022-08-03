@@ -1,0 +1,515 @@
+<!DOCTYPE HTML>
+<html lang="en">
+	<head>
+		<title>lynis report</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<style type="text/css">
+			html,body {color: #fff; background-color: #000;}
+			h3#exceptions {color: #ff0000;}
+			div#content_section {margin: 0 10% 0 10%;}
+			div.content_subsection {margin: 0 5% 0 5%;}
+			div.collapsable {display:none;}
+			div#footer {width:60%;margin:0 auto 0 20%;}
+			select {background:transparent;color:#fff;}
+			table {border-collapse:collapse;border:1px solid gray;}
+			table.list {border-collapse:collapse;border:none;}
+			table.list td,th {border-collapse:collapse;border:none;}
+			table#lynis_plugins_table {width:100%;}
+			table#scoreauditor {border-collapse:collapse;border:none;width:90%;}
+			td {padding:2px 5px 2px 5px;vertical-align:top;border:1px solid gray;}
+			td.field_label {font-size:1.1em;font-weight:bold;color:#555;}
+			td.good {background-color: #006400; color: #fff; font-weight: bold;}
+			td.fair {background-color: #ffd700; color: #000; font-weight: bold;}
+			td.poor {background-color: #ffa500; color: #000; font-weight: bold;}
+			td.dismal {background-color: #ff0000; color: #000; font-weight: bold;}
+			td.tf_bad {background-color:#ff0000; color: #000; font-weight: bold;}
+			td.tf_good {background-color: #006400; color: #fff; font-weight: bold;}
+			td#score {vertical-align:top;text-align:left;}
+			td#auditor {vertical-align:top;text-align:right;}
+			span.title_shrink {font-size: 75%;}
+			a:link#github_link {color: #fff;}
+			a:visited#github_link {color: #acacac;}
+			a:hover#github_link {color: #0000ff;}
+			a:active#github_link {color:#000;}
+			a:link {color: #fff;}
+			a:visited {color: #555;}
+			a:hover {color: #0000ff;}
+			a:active {color:#000;}
+		</style>
+		<script type="text/javascript">
+			function toggle(link,content) {
+				var ele = document.getElementById(content);
+				var text = document.getElementById(link);
+				if (ele.style.display == "block" ) {
+					ele.style.display = "none";
+					text.innerHTML = "&gt;&nbsp;show&nbsp;&lt;";
+				} else {
+					ele.style.display = "block";
+					text.innerHTML = "&lt;&nbsp;hide&nbsp;&gt;";
+				}
+			}
+		</script>
+	</head>
+	<body>
+		<div id="content_section">
+			<h1>lynis Asset Report</h1>
+			<h2><span class="title_shrink">created by</span> <a id="github_link" href="http://github.com/d4t4king/lynis_report" target="_blank">lynis_report</a></h2>
+			<table>
+				<tr>
+					<td><a href="#lynis_info">lynis info</a></td><td><a href="#host_info">host info</a></td>
+					<td><a href="#network_info">network info</a></td><td><a href="#security_info">security Info</a></td>
+					<td><a href="#boot_info">boot info</a></td><td><a href="#kernel_info">kernel info</a></td>
+				</tr>
+				<tr>
+					<td><a href="#filesystem_info">filesystem/journalling info</a></td><td><a href="#service_info">service info</a></td>
+					<td><a href="#installed_packages">installed packages</a></td><td></td>
+					<td></td><td></td>
+				</tr>
+			</table>
+			<hr />
+			<h3>host findings:</h3>
+			<table class="list" id="scoreauditor"><tr><td id="score"><table><tr><td>hardening index:</td>
+				<td class="dismal"></td>			</tr></table></td><td><table><tr><td id="auditor">Auditor:</td><td></td></tr></table></td></tr></table>
+<h4>warnings (0):</h4>
+			<div class="content_subsection">
+				<table>
+					<tr><td>Test ID</td><td>Description</td><td>Details</td><td>Solution</td></tr>
+				</table>
+			</div>
+			<h4>suggestions (0):</h4>
+			<div class="content_subsection">
+				<table>
+					<tr><td>Test ID</td><td>Description</td><td>Details</td><td>Solution</td></tr>
+				</table>
+			<h4>manual checks:</h4>
+			<ul>
+			</ul><br />
+				</select><br />
+			</div>
+			<hr />
+<!-- 
+###############################
+### LYNIS INFO
+###############################
+-->
+			<h3><a id="lynis_info">lynis info:</a></h3>
+			<div class="content_subsection">
+				<table>
+					<tr>
+					<td class="field_label">lynis version:</td><td></td>
+					<td class="field_label">lynis tests done:</td><td></td>
+					</tr>
+					<tr>
+					<td class="field_label">lynis update available:</td><td>false</td>
+
+
+
+
+
+
+<td class="field_label">license key:</td><td>&nbsp;</td>
+					</tr>
+					<tr>
+						<td colspan="2" class="field_label">report version:</td><td colspan="2">.</td>
+					</tr>
+					<tr>
+						<td class="field_label">test category:</td><td></td>
+						<td class="field_label">test group:</td><td></td>
+					</tr>
+					<tr>
+						<td class="field_label">number of plugins enabled:</td><td></td>
+						<td class="field_label">plugin directory:</td><td></td>
+					</tr>
+					<tr>
+						<td class="field_label">phase 1 plugins enabled:</td><td colspan="3">
+							<table id="lynis_plugins_table">
+							</table>
+						</td>
+					</tr>
+					<tr>
+						<td class="field_label">report start time:</td><td></td><td>report end time:</td><td></td>
+					</tr>
+					<tr><td class="field_label">hostid:</td><td colspan="3"></td></tr>
+					<tr><td class="field_label">hostid:</td><td colspan="3"></td></tr>
+				</table>
+				<h5>Plugin-processes: discovered processes:</h5>
+			</div>
+			<hr />
+			<h3><a id="host_info">host info:</a></h3>
+			<div class="content_subsection">
+				<table>
+					<tr>
+						<td class="field_label">hostname:</td><td></td>
+						<td class="field_label">domainname:</td><td>&nbsp;</td>
+						<td class="field_label">resolv.conf domain:</td><td>&nbsp;</td>
+					</tr>
+					<tr>
+						<td class="field_label">os:</td><td></td>
+						<td class="field_label">os fullname:</td><td></td>
+						<td class="field_label">os_version:</td><td></td>
+					</tr>
+					<tr>
+						<td class="field_label">GRSecurity:</td><td>false</td>
+						<td class="field_label">SELinux:</td><td>false</td>
+						<td class="field_label">memory:</td><td> </td>
+					</tr>
+					<tr>
+						<td class="field_label">linux version:</td><td></td>
+						<td class="field_label">pae enabled:</td><td>false</td>
+						<td class="field_label">nx enabled:</td><td>false</td>
+					</tr>
+					<tr>
+						<td class="field_label">Available shells:</td><td>&nbsp;</td>
+					<td class="field_label">locate db:</td><td>&nbsp;</td>
+					<td class="field_label">uptime (days):</td><td></td>
+					</tr>
+					<tr>
+						<td class="field_label">vm:</td><td>false</td>
+						<td class="field_label">vm_type:</td><td>&nbsp;</td>
+						<td class="field_label">uptime (secs):</td><td></td>
+					</tr>
+<tr><td class="field_label">is notebook/laptop:</td><td colspan="2">false</td><td class="field_label">is Docker container:</td><td colspan="2">false</td></tr>
+					<tr>
+						<td class="field_label">binary paths:</td><td colspan="2"></td>
+						<td class="field_label">valid certificates:</td><td colspan="2">&nbsp;</td>
+					</tr>
+					<tr>
+						<td class="field_label">authorized default USB devices:</td><td colspan="2">&nbsp;</td>
+						<td class="field_label">expired certificates:</td><td colspan="2">&nbsp;</td>
+					</tr>
+					<tr>
+						<td class="field_label">certificate count:</td><td colspan="2">0</td>
+						<td class="field_label">certificates:</td><td colspan="2">&nbsp;</td>
+					</tr>
+					<tr>
+						<td class="field_label"></td><td colspan="2"></td>
+						<td class="field_label"></td><td colspan="2"></td>
+					</tr>
+				</table>
+				<h4>cron jobs:</h4>
+
+				<h4>logging info:</h4>
+				<table>
+					<tr>
+						<td class="field_label">log rotation tool:</td><td></td>
+						<td class="field_label">log rotation config found:</td><td>false</td>
+					</tr>
+<tr><td  class="field_label"colspan="2">syslog daemon detected:</td><td colspan="2">false</td></tr>
+					<tr>
+						<td class="field_label" colspan="2">syslog daemon(s):</td>
+						<td colspan="2">&nbsp;</td>
+					</tr>
+				</table>
+				<br />
+				<h4>log directories:</h4>
+					<h4>open log files:</h4>
+				<h4>open empty log files:</h4>
+			</div>
+			<hr />
+			<h3><a id="network_info">network info:</a></h3>
+			<div class="content_subsection">
+				<table>
+					<tr>
+						<td class="field_label">IPv6 Mode:</td><td></td>
+						<td class="field_label">IPv6 Only:</td><td>false</td>
+					</tr>
+						<tr><td class="field_label" colspan="2">network interfaces:</td><td colspan="2">&nbsp;</td></tr>
+						<tr><td class="field_label" colspan="2">localhost mapped to:</td><td colspan="2">&nbsp;</td></tr>
+					<tr><td class="field_label" colspan="2">ipv4 addresses:</td><td colspan="2">&nbsp;</td></tr>
+					<tr><td class="field_label" colspan="2">ipv6 addresses:</td><td colspan="2">&nbsp;</td></tr>
+					<tr><td class="field_label" colspan="2">Default Gateway</td><td colspan="2"></td></tr>
+					<tr>
+						<td class="field_label">MAC Address:</td><td>&nbsp;</td>
+						<td class="field_label">Name Cache Used:</td><td>false</td>
+					</tr>
+						<tr><td class="field_label" colspan="2">name servers:</td><td colspan="2">&nbsp;</td></tr>
+					<tr>
+						<td class="field_label" colspan="2">resolv.conf search domain:</td>
+						<td colspan="2">&nbsp;</td>
+					</tr>
+				</table>
+				<h4>Open Ports:</h4>
+				<table>
+					<tr><td>IP Address</td><td>Port</td><td>Protocol</td><td>Daemon/Process</td><td>???</td></tr>
+				</table>
+			</div>
+			<hr />
+			<h3><a id="security_info">security info:</a></h3>
+			<div class="content_subsection">
+				<table>
+					<tr>
+					<td class="field_label">Host Firewall Installed:</td><td>false</td>
+					<td class="field_label">Firewall Software:</td><td>&nbsp;</td>
+					<td class="field_label">Firewall Empty Ruleset:</td><td>false</td>
+					<td class="field_label">Firewall Active:</td><td>false</td>
+					</tr>
+					<tr>
+						<td class="field_label">Package Audit Tools Found:</td><td>false</td>
+						<td class="field_label">Package Audit Tool:</td><td></td>
+						<td class="field_label">Vulnerable Packages Found:</td><td></td>
+						<td class="field_label">Package Manager:</td><td></td>
+					</tr>
+					<tr>
+						<td class="field_label">Two-Factor Authentication Enabled:</td><td>false</td>
+						<td class="field_label">Two-Factor Authentication Required:</td><td>false</td>
+						<td class="field_label">LDAP PAM Module Enabled:</td><td>false</td>
+						<td class="field_label">LDAP Auth Enabled:</td><td>false</td>
+					</tr>
+					<tr>
+						<td class="field_label">Minimum Password Length:</td><td>0</td>
+						<td class="field_label">Maximum Password Days:</td><td>0</td>
+						<td class="field_label">Minimum Password Days:</td><td>0</td>
+						<td class="field_label">Maximum Password Retries:</td><td>0</td>
+					</tr>
+					<tr>
+						<td class="field_label">Password Complexity Score:</td><td>0</td>
+						<td class="field_label">PAM Cracklib Found:</td><td>false</td>
+						<td class="field_label">Password Strength Tested:</td><td>false</td>
+						<td class="field_label">PAM Password Quality:</td><td>&nbsp;</td>
+					</tr>
+					<tr>
+						<td class="field_label">File Integrity Tools Installed:</td><td>false</td>
+						<td class="field_label">File Integrity Tool:</td><td>NA</td>
+						<td class="field_label">Automation Tool Present:</td><td>false</td>
+						<td class="field_label">Automation Tool:</td><td>&nbsp;</td>
+					</tr>
+					<tr>
+						<td class="field_label">Malware Scanner Installed:</td><td>false</td>
+						<td class="field_label">Malware Scanner(s):</td><td>&nbsp;</td>
+						<td class="field_label">compiler installed:</td><td>false</td>
+						<td class="field_label">compilers:</td><td>&nbsp;</td>
+					</tr>
+					<tr>
+						<td class="field_label">IDS/IPS Tooling</td><td>&nbsp;</td>
+						<td class="field_label">Failed Logins Logged:</td><td></td>
+						<td class="field_label">fail2ban config file(s):</td><td>&nbsp;</td>
+						<td class="field_label">fail2ban enabled service(s):</td><td>&nbsp;</td>
+</tr>
+<tr><td class="field_label">AppArmor Enabled:</td><td>false</td>
+<td class="field_label">AppArmor Policy Loaded:</td><td>false</td>
+<td class="field_label">SELinux Status:</td><td>false</td>
+<td class="field_label">SELinux mode:</td><td>&nbsp;</td></tr>
+<tr><td class="field_label">Group Names Unique</td><td>false</td>
+<td class="field_label">Group IDs Unique</td><td>false</td>
+<td class="field_label"></td><td></td>
+<td class="field_label"></td><td></td></tr>
+				</table>
+				<table class="list">
+					<tr><td><h4>real users:</h4></td><td><h4>home directories:</h4></td></tr>
+					<tr><td>
+						<table class="list">
+							<tr><td>name</td><td>uid</td></tr>
+							<tr><td>NA</td><td>NA</td></tr>
+						</table></td><td><select size="10" name="lbHomeDirectories">
+					</select></td></tr>
+				</table>
+				<h4>PAM Modules:</h4><a id="pamModLink" href="javascript:toggle('pamModLink', 'pamModToggle');">&gt;&nbsp;show&nbsp;&lt;</a>
+				<div id="pamModToggle" style="display: none">
+					</table>
+				</div>
+			</div>
+			<hr />
+			<h3><a id="boot_info">boot info:</a></h3>
+			<div class="content_subsection">
+				<table>
+					<tr>
+						<td class="field_label">UEFI booted:</td><td>false</td>
+						<td class="field_label">UEFI booted secure:</td><td>false</td>
+					</tr>
+					<tr>
+						<td class="field_label">default runlevel:</td><td></td>
+						<td class="field_label">boot service tool:</td><td>&nbsp;</td>
+					</tr>
+				</table>
+				<h4>services started at boot:</h4>
+			</div>
+			<hr />
+			<h3><a id="kernel_info">kernel info:</a></h3>
+			<div class="content_subsection">
+				<table>
+					<tr>
+					<td class="field_label">kernel version:</td><td></td>
+					<td class="field_label">full kernel version:</td><td></td>
+					</tr>
+					<tr>
+					<td class="field_label">kernel release version:</td><td></td>
+					<td class="field_label">kernel IO scheduler:</td><td>&nbsp;</td>
+					</tr>
+					<tr>
+					<td class="field_label">linux kernel type:</td><td></td>
+					<td class="field_label">number of kernels available:</td><td>&nbsp;</td>
+					</tr>
+				</table>
+				<h4>kernel modules loaded:</h4><a id="kernelModLink" href="javascript:toggle('kernelModLink', 'kernelModToggle');">&gt;&nbsp;show&nbsp;&lt;</a>
+				<div id="kernelModToggle" style="display: none">
+				</div>
+			</div>
+			<hr />
+			<h3><a id="filesystem_info">filesystem/journalling info:</a></h3>
+			<div class="content_subsection">
+				<table>
+					<tr>
+					<td class="field_label">oldest boot date:</td><td>&nbsp;</td>
+					<td class="field_label">journal errors:</td><td>false</td>
+					</tr>
+					<tr>
+					<td class="field_label">journal disk size:</td><td>&nbsp;</td>
+					<td class="field_label">last cordumps:</td><td>&nbsp;</td>
+					</tr>
+					<tr>
+						<td class="field_label">filesystems:</td><td>&nbsp;</td>
+					</tr>
+						<tr><td class="field_label">LVM volume group(s):</td><td>&nbsp;</td><td class="field_label">LVM volume(s)</td><td>&nbsp;</td></tr>
+					<tr>
+						<td class="field_label">journal boot log found:</td><td>false</td>
+						<td class="field_label"></td><td></td>
+					</tr>
+				</table>
+				<br />
+				<h4>journal metadata:</h4><a id="journalMetaDataLink" href="javascript:toggle('journalMetaDataLink', 'journalMetaDataToggle');">&gt;&nbsp;show&nbsp;&lt;</a>
+				<div id="journalMetaDataToggle" style="display:none">
+				</div>
+			</div>
+			<hr />
+			<h3><a id="service_info">service info:</a></h3>
+			<div class="content_subsection">
+				<table>
+					<tr><td class="field_label">arpwatch running:</td><td>false</td></tr>
+					<tr><td class="field_label">audit_daemon running:</td><td>false</td></tr>
+					<tr><td class="field_label">dhcp_client running:</td><td>false</td></tr>
+					<tr><td class="field_label">linux_auditd running:</td><td>false</td></tr>
+					<tr><td class="field_label">mysql running:</td><td>false</td></tr>
+					<tr><td class="field_label">nginx running:</td><td>false</td></tr>
+					<tr><td class="field_label">ntp_daemon running:</td><td>false</td></tr>
+					<tr><td class="field_label">postgresql running:</td><td>false</td></tr>
+					<tr><td class="field_label">redis running:</td><td>false</td></tr>
+					<tr><td class="field_label">ssh_daemon running:</td><td>false</td></tr>
+				</table>
+				<h4>daemon info:</h4>
+					<table>
+						<tr><td class="field_label">pop3 daemon:</td><td>&nbsp;</td></tr>
+						<tr><td class="field_label">imap daemon:</td><td>&nbsp;</td></tr>
+						<tr><td class="field_label">smtp daemon:</td><td></td></tr>
+						<tr><td class="field_label">printing daemon:</td><td>&nbsp;</td></tr>
+						<tr><td class="field_label">ntp daemon:</td><td>&nbsp;</td></tr>
+						<tr><td class="field_label">scheduler(s):</td><td>&nbsp;</td></tr>
+						<tr><td class="field_label">service manager:</td><td>&nbsp;</td></tr>
+						<tr><td class="field_label">running service tool:</td><td>&nbsp;</td></tr>
+					</table>
+				<h4>running services:</h4>
+				<select size="1">
+					<option>"NA"
+				</select>
+				<h5>ntp detail:</h5><a id="ntpDetailLink" href="javascript: toggle('ntpDetailLink','ntpDetailToggle');">&gt;&nbsp;show&nbsp;&lt;</a>
+				<div id="ntpDetailToggle" style="display: none">
+					<table>
+						<tr>
+							<td>ntp config found:</td><td>false</td>
+							<td>ntp config file:</td><td>&nbsp;</td>
+						</tr>
+						<tr>
+							<td>ntp version:</td><td>&nbsp;</td>
+							<td>unreliable peers:</td><td>&nbsp;</td>
+						</tr>
+						<tr><th colspan="4">NTP Config Type</th></tr>
+						<tr>
+							<td>startup:</td><td>false</td>
+							<td>daemon:</td><td>false</td>
+						</tr>
+						<tr>
+							<td>scheduled:</td><td>false</td>
+							<td>event based:</td><td>false</td>
+						</tr>
+					</table>
+				</div><!-- END ntpDetailToggle div -->
+				<br />
+				<h5>nginx detail</h5>
+				<table>
+					<tr>
+						<td class="field_label">main config file:</td><td>&nbsp;</td>
+					<td class="field_label">other config file(s):</td><td>&nbsp;</td>
+					</tr>
+					<tr>
+						<td class="field_label">log file:</td><td>&nbsp;</td>
+						<td class="field_label"></td><td></td>
+					</tr>
+				</table>
+				<h5>nginx config options:</h5><a id="nginxConfigLink" href="javascript: toggle('nginxConfigLink', 'nginxConfigToggle');">&gt;&nbsp;show&nbsp;&lt;</a>
+					<div id="nginxConfigToggle" style="display:none;">
+					<ul>
+						<li>&nbsp;</li>
+					</ul>
+					</div><!-- END nginxConfigToggle div --><br />
+					<h5>SSL/TLS protocols enabled:</h5>
+					<a id="ssltlsProtoLink" href="javascript: toggle('ssltlsProtoLink', 'ssltlsProtoToggle');">&gt;&nbsp;show&nbsp;&lt;</a>
+					<div id="ssltlsProtoToggle" style="display:none;">
+						<ul>
+						<li>&nbsp;</li>
+					</ul>
+				</div><!-- END ssltlsProtoToggle div --><br />
+					<h5>apache details:</h5>
+					<a id="apacheDetailsLink" href="javascript:toggle('apacheDetailsLink','apacheDetailsToggle');">&gt; &nbsp; show &nbsp; &lt;</a>
+					<div id="apacheDetailsToggle" style="display:none;">
+						<table><tr><td>apache version:</td><td>&nbsp;</td></tr></table>
+						<h5>apache modules found:</h5>
+						<a id="apacheModulesLink" href="javascript:toggle('apacheModulesLink','apacheModulesToggle');">&gt; &nbsp; show &nbsp; &lt;</a>
+						<div id="apacheModulesToggle" style="display:none;">
+							<ul>
+							</ul>
+						</div><!-- END apacheModulesToggle div -->
+					</div><!-- END apacheDetailsToggle div -->
+				<h5>systemd detail:</h5><a id="systemdLink" href="javascript:toggle('systemdLink', 'systemdToggle');">&gt;&nbsp;show&nbsp;&lt;</a>
+				<div id="systemdToggle" style="display:none;">
+					<table>
+						<tr>
+						<td>systemd version:</td><td>&nbsp;</td>
+						<td>systemd status:</td><td>&nbsp;</td>
+						</tr>
+						<tr>
+						<td>systemd builtin components:</td><td colspan="3">&nbsp;</td>
+						</tr>
+					</table>
+					<h5>systemd unit files:</h5><a id="systemdUnitFileLink" href="javascript:toggle('systemdUnitFileLink','systemdUnitFileToggle');">&gt; &nbsp; show &nbsp; &lt;</a>
+					<div id="systemdUnitFileToggle" style="display:none;">
+						<table>
+							<tr><th>unit file</th><th>status</th><th></th><tr>
+						</table>
+					</div><!-- END systemdUnitFileToggle div -->
+					<h5>systemd unit not found:</h5><a id="systemdUnitNotFoundLink" href="javascript:toggle('systemdUnitNotFoundLink','systemdUnitNotFoundToggle');">&gt; &nbsp; show &nbsp; &lt;</a>
+					<div id="systemdUnitNotFoundToggle" style="display:none;">
+						<ul>
+						</ul>
+					</div><!-- END systemdUnitNotFoundToggle div -->
+					<h5>systemd service not found:</h5><a id="systemdServiceNotFoundLink" href="javascript:toggle('systemdServiceNotFoundLink','systemdServiceNotFoundToggle');">&gt; &nbsp; show &nbsp; &lt;</a>
+					<div id="systemdServiceNotFoundToggle" style="display:none;">
+						<ul>
+						</ul>
+					</div><!-- END systemdServiceNotFoundToggle div -->
+				</div><!-- END systemdToggle -->	
+			</div><!-- END subcontent div -->
+			<hr />
+			<h3><a id="installed_packages">Installed packages:</a></h3>
+			<div class="content_subsection">
+				<table>
+					<tr>
+						<td class="field_label">Number of packages installed:</td><td></td>
+						<td class="field_label">Number of binaries found:</td><td></td>
+					</tr>
+				</table>
+				<br />
+				<a id="pkgLink" href="javascript: toggle('pkgLink', 'pkgContent');">&gt;&nbsp;show&nbsp;&lt;</a>
+				<div id="pkgContent" style="display: none">
+				</div>	<!-- #jsToggle -->
+			</div>	<!-- #subcontainer -->
+			<div id="footer">
+				<hr />
+				<p><a href="http://jigsaw.w3.org/css-validator/check/referer">
+					<img style="border:0;width:88px;height:31px;"
+						src="http://jigsaw.w3.org/css-validator/images/vcss"
+						alt="Valid CSS!" />
+				</a></p>
+			</div>	<!-- #footer -->
+		</div>	<!-- #container -->
+	</body>
+</html>
+
