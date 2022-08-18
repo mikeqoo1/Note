@@ -233,3 +233,8 @@ TiCDC只能同步至少存在一個有效索引的表
  - 索引中每一列的結構中明確定義非空(NOT NULL)
  - 索引中不存在虛擬生成列(VIRTUAL GENERATED COLUMNS)
 
+
+TiFlash 是 列式儲存
+TiKV    是 行式儲存
+
+
