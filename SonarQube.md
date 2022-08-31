@@ -66,7 +66,9 @@ sonar.source=./
 sonar.language=c++
 sonar.host.url=192.168.199.235:9000
 sonar.sourceEncoding=UTF-8
-sonar.cxx.cppcheck.reportPath=cppcheck-report.xml
+sonar.cxx.cppcheck.reportPaths=cppcheck-report.xml
+sonar.cxx.file.suffixes=.h,.cpp
+sonar.scm.disabled=true
 
 上傳回報
 -Dsonar.login=後面加該專案的Token
