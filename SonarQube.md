@@ -40,16 +40,29 @@ source ~/.bashrc
 
 3. sonar-cxx-plugin 的安裝在下面
 
-#  先去下載套件 https://github.com/SonarOpenCommunity/sonar-cxx
+# 先去下載套件 https://github.com/SonarOpenCommunity/sonar-cxx
 
-#  丟到容器裡面 sudo docker cp sonar-cxx-plugin-2.0.7.3119.jar sonarqube:/opt/sonarqube/extensions/plugins
+# 丟到容器裡面 sudo docker cp sonar-cxx-plugin-2.0.7.3119.jar sonarqube:/opt/sonarqube/extensions/plugins
 
-#  重新啟動 sudo docker restart sonarqube
+# 重新啟動 sudo docker restart sonarqube
 
-#  進網頁設定
-
+# 進網頁設定
 
 https://blog.csdn.net/qq_15559817/article/details/100736498
+```
+
+## 原始碼覆蓋率 gcovr
+
+```txt
+# 先安裝 sudo apt-get install -y gcovr
+
+# 編譯選項要加入 --coverage
+
+# 執行單元測試程式
+
+# 生成報告 gcovr -r . --html --html-details -o coverage/index.html
+
+http://blog.fpliu.com/it/software/gcovr
 ```
 
 ### 範例使用
