@@ -50,7 +50,7 @@ Kibana 是圖形化展示工具 將儲存在Elasticsearch內的資料用各式�
 
 Beats 是Log採集工具 負責將本台電腦的Log檔取出傳遞到logstash做過濾
 
-![簡易架構](ELK架構.png)
+![簡易架構](img/ELK架構.png)
 
 ## Install OpenJDK
 

@@ -14,7 +14,7 @@ sudo docker run --name sonarqube \
 
 ## C/C++的檢測
 
-![流程](CXX.png)
+![流程](img/CXX.png)
 
 ```txt
 
