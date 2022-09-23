@@ -68,3 +68,59 @@ SYN_RECV表示正在等待處理的請求數；
 ESTABLISHED表示正常資料傳輸狀態；
 TIME_WAIT表示處理完畢，等待超時結束的請求數。
 ```
+
+
+隱身密技
+
+隱藏遠端登入
+ssh -T user@host /bin/bash -i
+
+不紀錄ssh公鑰在本地.ssh目錄中
+ssh -o UserKnownHostsFile=/dev/null -T user@host /bin/bash -i
+
+清除操作紀錄
+
+1. 編輯 vim~/.bash_history
+
+2. 清除該User紀錄 history -c
+
+3. 清除不想出現的指令 history | grep "part of command you want to remove" 
+                   history -d [num]
+
+4. 登入後輸入下面指令 不紀錄指令
+export HISTFILE=/dev/null;
+export HISTSIZE=0;
+export HISTFILESIZE=0
+
+清除系統LOG
+
+1. 通通清除 (很容易被發現, 不優)
+echo > /var/log/wtmp //清除User登入紀錄
+echo > /var/log/btmp //清除嘗試登入紀錄
+echo > /var/log/lastlog //清除最近登入紀錄
+echo > /var/log/secure //登入訊息
+echo > /var/log/messages
+echo > /var/log/syslog //紀錄系统LOG
+echo > /var/log/xferlog
+echo > /var/log/auth.log
+echo > /var/log/user.log
+cat /dev/null > /var/adm/sylog
+cat /dev/null > /var/log/maillog
+cat /dev/null > /var/log/openwebmail.log
+cat /dev/null > /var/log/mail.info
+echo > /var/run/utmp
+
+2. 替換或刪除部份
+
+删除所有匹配的字串, 比如當天日期或者自己的登入ip
+sed  -i '/自己的ip/'d  /var/log/messages
+
+替换登入ip
+sed -i 's/192.168.166.85/192.168.1.1/g' secure
+
+
+
+
+
+
+
