@@ -218,3 +218,24 @@ type={ALL|BLOCK IO|CONTEXT SWITCHES|CPU|IPC|MEMORY|PAGE FAULTS|SOURCE|SWAPS}
 ```sql
 SHOW STATUS LIKE '%connected';
 ```
+
+
+（1）匯出整個資料庫(包括資料庫中的資料）
+
+    mysqldump -h ip -u username -p dbname > dbname.sql
+
+（2）匯出資料庫結構（不含資料）
+
+    mysqldump -h ip -u username -p -d dbname > dbname.sql
+
+（3）匯出資料庫中的某張資料表（包含資料）
+
+    mysqldump -h ip -u username -p dbname tablename > tablename.sql
+
+（4）匯出資料庫中的某張資料表的表結構（不含資料）
+
+    mysqldump -h ip -u username -p -d dbname tablename > tablename.sql
+
+匯入
+mysql -h ip -u username -p dbname < tablename.sql
+

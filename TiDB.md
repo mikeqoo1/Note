@@ -169,7 +169,7 @@ https://docs.pingcap.com/zh/tidb/stable/migrate-data-using-dm#%E7%AC%AC-4-%E6%AD
 https://docs.pingcap.com/zh/tidb/stable/quick-start-create-task
 
 
-![實際操作](TiDM實際操作流程.png)
+![實際操作](img/TiDM實際操作流程.png)
 
 1. 先確認MariaDB的設定 是否設定 server_id binlog要開且設定要長這樣binlog_format=ROW跟binlog_row_image=FULL DM工具只支持這2個
 
