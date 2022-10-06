@@ -90,6 +90,55 @@ rpm -ql sysbench | grep 'bin\|lua'
 
 刪除假資料:sysbench --db-driver=mysql --mysql-user=帳號 --mysql-password=密碼 --mysql-socket=mysql.socket路徑 --mysql-db=資料庫 --range_size=100 --table_size=10000 --tables=2 --threads=1 --events=0 --time=60 --rand-type=uniform /usr/share/sysbench/oltp_read_only.lua cleanup
 
+CPU 壓力測試
+sysbench cpu --cpu-max-prime=20000 --threads=64 --time=3600 run
+
+I/O測試 I/O的性能因Block Storage大小而異, Block Storage越小, 吞吐量越小, IOPS越高 這邊都採用16K
+
+1個Thread 1個檔案數量
+
+sysbench fileio --threads=1 --time=10 --file-num=1 --file-block-size=16K --file-total-size=8G --file-test-mode=rndrw prepare
+
+sysbench fileio --threads=1 --time=10 --file-num=1 --file-block-size=16K --file-total-size=8G --file-test-mode=rndrw run
+
+sysbench fileio --threads=1 --time=10 --file-num=1 --file-block-size=16K --file-total-size=8G --file-test-mode=rndrw cleanup
+
+1個Thread 多個檔案數量
+
+sysbench fileio --threads=1 --time=10 --file-num=4 --file-block-size=16K --file-total-size=8G --file-test-mode=rndrw prepare
+
+sysbench fileio --threads=1 --time=10 --file-num=4 --file-block-size=16K --file-total-size=8G --file-test-mode=rndrw run
+
+sysbench fileio --threads=1 --time=10 --file-num=4 --file-block-size=16K --file-total-size=8G --file-test-mode=rndrw cleanup
+多個Thread 1個檔案數量
+sysbench fileio --threads=64 --time=10 --file-num=1 --file-block-size=16K --file-total-size=8G --file-test-mode=rndrw prepare
+
+sysbench fileio --threads=64 --time=10 --file-num=1 --file-block-size=16K --file-total-size=8G --file-test-mode=rndrw run
+
+sysbench fileio --threads=64 --time=10 --file-num=1 --file-block-size=16K --file-total-size=8G --file-test-mode=rndrw cleanup
+多個Thread 多個檔案
+sysbench fileio --threads=64 --time=10 --file-num=4 --file-block-size=16K --file-total-size=8G --file-test-mode=rndrw prepare
+sysbench fileio --threads=64 --time=10 --file-num=4 --file-block-size=16K --file-total-size=8G --file-test-mode=rndrw run
+sysbench fileio --threads=64 --time=10 --file-num=4 --file-block-size=16K --file-total-size=8G --file-test-mode=rndrw cleanup
+
+Linux File I/O 分3種模式
+O_DIRECT: I/O operations performed against files opened with O_DIRECT bypass the kernel's page cache, writing directly to the storage.
+O_SYNC: File data and all file metadata are written synchronously to disk.
+O_DSYNC: Only file data and metadata needed to access the file data are written synchronously to disk. Metadata that is not required for retrieving the data of the file may not be written immediately.
+
+上面的解释非常不清楚，我找到了这篇名为“UNIX高级环境编程（14）文件IO - O_DIRECT和O_SYNC详解 < 海棠花溪 >”的文章。看了之后，才终于懂了这两个flag的区别。
+
+O_DIRECT：用于让IO从用户态直接跨过“stdio缓冲区的高速缓存”和“内核缓冲区的高速缓存”，直接写到存储上。
+
+O_SYNC：用于控制“内核缓冲区的高速缓存”直接写到存储上，即强制刷新内核缓冲区到输出文件的存储。
+
+
+I/O缓冲的过程是这样的：
+用户数据 –> stdio缓冲区 –> 内核缓冲区高速缓存 –> 磁盘
+
+可见，上面的两个flag的区别是O_DIRECT让IO从用户数据中直接到磁盘（跨过了两个缓冲区），而O_SYNC让IO从内核缓冲区直接到磁盘（仅跨过了内核缓冲区）。
+
+
 ### CentOS8.x設定
 
 DNS設定
@@ -228,3 +277,36 @@ nc ip port
 https://blog.gtwang.org/linux/linux-utility-netcat-examples/
 https://myapollo.com.tw/zh-tw/linux-command-nc/
 https://kknews.cc/zh-tw/code/ky8r8z8.html
+
+### stress-ng (升級版的sysbench)
+
+                IP Address
+EMTS-01         IP:192.168.199.133
+EMTS-02         IP:192.168.199.134
+EMTS-QA-01      IP:192.168.199.227
+EMTS-QA-02      IP:192.168.199.250
+
+https://ephrain.net/linux-%E5%9C%A8-centos-%E4%B8%8A%E4%BD%BF%E7%94%A8-stress-%E6%A8%A1%E6%93%AC%E7%B3%BB%E7%B5%B1%E8%B3%87%E6%BA%90%E5%90%83%E7%B7%8A%E7%9A%84%E7%8B%80%E6%B3%81-cpu%E8%A8%98%E6%86%B6%E9%AB%94/
+
+install
+
+sudo dnf -y install stress-ng
+sudo dnf -y install sysstat (用於Linux的性能監視工具的集合)
+
+針對CPU的壓力測試, 在所有的 CPU 上執行各種 stressors, 持續 1 小時
+stress-ng --cpu 0 --cpu-method all -t 1h
+
+針對記憶體測試
+stress-ng --vm 8 --vm-bytes 80% -t 1h
+
+https://officeguide.cc/linux-stress-ng-cpu-memory-hard-drive-full-load-tutorial-examples/
+
+https://www.51cto.com/article/707986.html
+
+https://blog.csdn.net/weixin_43991475/article/details/124980475?spm=1001.2101.3001.6650.2&utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7ERate-2-124980475-blog-121461501.pc_relevant_default&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7ERate-2-124980475-blog-121461501.pc_relevant_default&utm_relevant_index=4
+
+
+
+
+lspci -Dm | grep -i raid
+0000:c1:00.0 "RAID bus controller" "Broadcom / LSI" "MegaRAID 12GSAS/PCIe Secure SAS39xx" "Broadcom / LSI" "MegaRAID 9560-16i"

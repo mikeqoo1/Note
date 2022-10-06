@@ -5,7 +5,7 @@
 ```bash
 先把IE的憑證匯出來, ??????.cer
 
-上網 處理方法
+上網 處理方法 For Ubuntu
 sudo cp ??????.cer /etc/ssl/certs
 
 npm 處理方法
@@ -14,6 +14,10 @@ npm config set cafile "/path/??????.cer"
 snap 處理方法
 openssl x509 -inform der -in ??????.cer -out xxxx.pem
 sudo snap set system store-certs.cert1="$(cat /path/xxxx.pem)"
+
+For Rocky/CentOS
+sudo cp ??????.cer /etc/pki/ca-trust/source/anchors/
+sudo update-ca-trust
 ```
 
 ## 系統裝機手冊2.0
