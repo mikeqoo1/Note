@@ -38,10 +38,10 @@ SHOW GRANTS FOR 'user'@'%';(查看帳號權限)
 (1372, 'Password hash should be a 41-digit hexadecimal number')如何處理
 select password('[你的密碼明碼]');
 create user '帳號'@'%' identified by password '你的加密密碼';
-
+select password('Aa1234');
 重新設定密碼：
 SET PASSWORD FOR 'dbuser'@'%' = '你的加密密碼';
-
+SET PASSWORD FOR 'crcft'@'%' = '*E798321A750FDD829997240D5DC2F2FFC4D06D6D';
 遠端登入無法的問題 在設定檔加入 skip-grant-tables
 ```
 

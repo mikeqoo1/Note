@@ -310,3 +310,18 @@ https://blog.csdn.net/weixin_43991475/article/details/124980475?spm=1001.2101.30
 
 lspci -Dm | grep -i raid
 0000:c1:00.0 "RAID bus controller" "Broadcom / LSI" "MegaRAID 12GSAS/PCIe Secure SAS39xx" "Broadcom / LSI" "MegaRAID 9560-16i"
+
+
+
+
+https://www.alibabacloud.com/blog/testing-io-performance-with-sysbench_594709
+https://juejin.cn/post/6844903744904118279
+https://help.aliyun.com/document_detail/25382.html
+https://docs.aws.amazon.com/zh_tw/AWSEC2/latest/UserGuide/ebs-io-characteristics.html
+https://www.twblogs.net/a/5d407e00bd9eee51fbf99df1
+http://linux.51yip.com/search/sysbench
+https://www.cnblogs.com/awpatp/p/8777796.html
+https://blog.csdn.net/hilaryfrank/article/details/112200386
+http://laoar.github.io/blog/2017/04/28/directio/
+https://zhuanlan.zhihu.com/p/374627314
+https://elinux.org/images/5/5c/Lyon-stress-ng-presentation-oct-2019.pdf

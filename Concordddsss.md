@@ -59,6 +59,15 @@ gpgkey=https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
 gpgcheck=1
 ```
 
+```ini
+[mariadb]
+name = MariaDB
+baseurl = http://yum.mariadb.org/10.9/rhel9-amd64
+module_hotfixes=1
+gpgkey=https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
+gpgcheck=1 
+```
+
 安裝步驟跟設定
 
 ```ini
