@@ -229,7 +229,7 @@ sudo chmod 755 SFTP_DIRECTORY_ROOT
 ```
 
 ```bash
-sudo chown newuser:newuser SFTP_DIRECTORY
+sudo chown NEW_USER:NEW_USER SFTP_DIRECTORY
 ```
 
 ```bash
@@ -239,7 +239,7 @@ sudo vi /etc/ssh/sshd_config
 ADD THIS --->
 
 ```bash
-Match User newuser
+Match User NEW_USER
 ForceCommand internal-sftp
 PasswordAuthentication yes
 ChrootDirectory SFTP_DIRECTORY_ROOT
