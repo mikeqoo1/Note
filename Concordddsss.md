@@ -44,6 +44,15 @@ firewall-cmd --zone=trusted --add-port=3389/tcp --permanent
 firewall-cmd --zone=public --add-port=3389/tcp --permanent
 firewall-cmd --reload
 firewall-cmd --list-all
+
+
+git 設定
+git config --global user.name "199250"
+git config --global user.email 192168199250@concords.com.tw
+git config --global alias.lg "log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(blue)<%an>%Creset' --abbrev-commit --all"
+
+npm config set cafile "~/certificate.crt"
+
 ```
 
 ## 安裝 MariaDB 10.6

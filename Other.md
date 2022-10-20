@@ -80,3 +80,13 @@ PATH=/usr/local/bin:$PATH:$HOME/bin
 sudo yum install python3-devel
 sudo pip3 install mycli
 ```
+
+## Docker 更新
+
+先把遠端的images pull下來, 開啟容器, 進入修改後, commit起來 在推上去
+
+sudo docker run -d --name $容器名稱 -i -t  /bin/bash $映像檔
+
+sudo docker commit -m "訊息內容" $容器名稱 $映像檔
+
+sudo docker push $映像檔
