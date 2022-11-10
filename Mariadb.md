@@ -42,6 +42,12 @@ select password('Aa1234');
 重新設定密碼：
 SET PASSWORD FOR 'dbuser'@'%' = '你的加密密碼';
 SET PASSWORD FOR 'crcft'@'%' = '*E798321A750FDD829997240D5DC2F2FFC4D06D6D';
+
+
+GRANT USAGE ON *.* TO `intrauser`@`%` IDENTIFIED BY PASSWORD '*E798321A750FDD829997240D5DC2F2FFC4D06D6D';
+GRANT SELECT ON `CRCFT`.* TO `intrauser`@`%`; 
+GRANT SELECT ON `EMTS`.* TO `intrauser`@`%`;
+
 遠端登入無法的問題 在設定檔加入 skip-grant-tables
 ```
 
