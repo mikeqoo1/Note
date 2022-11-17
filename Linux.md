@@ -254,6 +254,17 @@ X11Forwarding no
 sudo systemctl restart sshd
 ```
 
+
+時區問題: Server開啟sftp的chroot功能, Client登入後, ls -l顯示的時間不是Server的時間, 而是差了一個時區, 需要+8小時才是對的
+解法: 把系统的時區文件複製到sftp user下
+
+```bash
+ll /usr/share/zoneinfo/Asia/Taipei
+cd /home/r6emst/
+sudo mkdir etc
+sudo cp -r /usr/share/zoneinfo/Asia/Taipei etc/localtime
+```
+
 ### 小指令集合
 
 ```bash

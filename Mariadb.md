@@ -48,6 +48,11 @@ GRANT USAGE ON *.* TO `intrauser`@`%` IDENTIFIED BY PASSWORD '*E798321A750FDD829
 GRANT SELECT ON `CRCFT`.* TO `intrauser`@`%`; 
 GRANT SELECT ON `EMTS`.* TO `intrauser`@`%`;
 
+
+select password('110084');
+GRANT USAGE ON *.* TO `110084`@`%` IDENTIFIED BY PASSWORD '*EC5CCEC1DE4C476E935BE052BD7097232AEA8AD0';
+GRANT SELECT ON *.* TO `110084`@`%`; 
+ftpinstant
 遠端登入無法的問題 在設定檔加入 skip-grant-tables
 ```
 
