@@ -313,3 +313,11 @@ Podman網路說明
 
 - https://podman.io/getting-started/
 
+
+
+### 灌好系統後要做的事情
+
+sudo dnf -y groupinstall "Development Tools"
+
+- https://ciq.co/blog/top-10-things-to-do-after-rocky-linux-9-install/
+
