@@ -85,9 +85,9 @@ sudo pip3 install mycli
 
 先把遠端的images pull下來, 開啟容器, 進入修改後, commit起來 在推上去
 
-sudo docker run -d --name $容器名稱 -it  /bin/bash $映像檔
+sudo docker run $映像檔 --name $容器名稱 -i -t /bin/bash
 
-###sudo docker run --name AAAAA -it 106061/rocky9cicd###
+sudo docker run 106061/rocky9cicd -i -t /bin/bash
 
 sudo docker commit -m "訊息內容" $容器名稱 $映像檔
 
