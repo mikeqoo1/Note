@@ -119,7 +119,40 @@ sed  -i '/自己的ip/'d  /var/log/messages
 sed -i 's/192.168.166.85/192.168.1.1/g' secure
 
 
+```txt
+命令    日誌文件            功能
+last   |/var/log/wtmp    |所有成功登錄/登出的歷史記錄
+lastb  |/var/log/btmp    |登錄失敗嘗試
+lastlog|/var/log/lastlog |最近登錄記錄
+```
 
+## 修改 wtmp 和 utmp 文件
+
+```txt
+第一步:
+
+通過下面指令把二進位文件轉成可編輯文件 wtmp.file
+
+utmpdump /var/log/wtmp > /var/log/wtmp.file
+
+第二步:
+
+編輯/var/log/wtmp.file 刪除部分login紀錄，或修改登錄紀錄
+
+第三步:
+
+文件轉回二進位文件
+
+utmpdump -r < /var/log/wtmp.file > /var/log/wtmp
+
+最後:
+
+修改完成，可用last命令查看修改结果。
+
+總结:
+
+utmp/wtmp文件可用utmpdump 在二進位跟正常可編輯文件做轉換
+```
 
 
 

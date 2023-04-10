@@ -126,17 +126,17 @@ O_DIRECT: I/O operations performed against files opened with O_DIRECT bypass the
 O_SYNC: File data and all file metadata are written synchronously to disk.
 O_DSYNC: Only file data and metadata needed to access the file data are written synchronously to disk. Metadata that is not required for retrieving the data of the file may not be written immediately.
 
-上面的解释非常不清楚，我找到了这篇名为“UNIX高级环境编程（14）文件IO - O_DIRECT和O_SYNC详解 < 海棠花溪 >”的文章。看了之后，才终于懂了这两个flag的区别。
+上面的解释非常不清楚，我找到了這篇名为“UNIX高级环境编程（14）文件IO - O_DIRECT和O_SYNC详解 < 海棠花溪 >”的文章。看了之后，才终于懂了這两個flag的区别。
 
-O_DIRECT：用于让IO从用户态直接跨过“stdio缓冲区的高速缓存”和“内核缓冲区的高速缓存”，直接写到存储上。
+O_DIRECT：用于让IO从使用者态直接跨过“stdio缓冲区的高速缓存”和“内核缓冲区的高速缓存”，直接写到存储上。
 
 O_SYNC：用于控制“内核缓冲区的高速缓存”直接写到存储上，即强制刷新内核缓冲区到输出文件的存储。
 
 
-I/O缓冲的过程是这样的：
-用户数据 –> stdio缓冲区 –> 内核缓冲区高速缓存 –> 磁盘
+I/O缓冲的过程是這样的：
+使用者數據 –> stdio缓冲区 –> 内核缓冲区高速缓存 –> 硬碟
 
-可见，上面的两个flag的区别是O_DIRECT让IO从用户数据中直接到磁盘（跨过了两个缓冲区），而O_SYNC让IO从内核缓冲区直接到磁盘（仅跨过了内核缓冲区）。
+可见，上面的两個flag的区别是O_DIRECT让IO从使用者數據中直接到硬碟（跨过了两個缓冲区），而O_SYNC让IO从内核缓冲区直接到硬碟（仅跨过了内核缓冲区）。
 
 
 ### CentOS8.x設定
@@ -336,3 +336,16 @@ https://blog.csdn.net/hilaryfrank/article/details/112200386
 http://laoar.github.io/blog/2017/04/28/directio/
 https://zhuanlan.zhihu.com/p/374627314
 https://elinux.org/images/5/5c/Lyon-stress-ng-presentation-oct-2019.pdf
+
+### Lastlog文件一直變大的原因
+
+```txt
+Lastlog文件是紀錄所有使用者最後登入的相關資訊，該文件的算法是：紀錄使用者登入信息大小 = UID * 256byte
+
+如64位系统上的nfsnobody使用者，其UID是4294967294 或者 2^32 - 2，這也是系统上最後一個的UID。
+所以通過上面的算法就能說明該文件顯示1.2TB大小：4294967294 * 256 = 1099511627264 bytes。
+
+從上面的算法也可以知道，256是每一UID在lostlog文件中所佔用的空間大小。
+
+所以這種文件就是所谓的sparse(稀疏)文件，就是在文件中留有很多剩餘空間，預先備用將來插入數據使用。這些剩餘空間被ASCII碼的NULL佔據，並且這些空間相當大，這個文件就被稱为稀疏文件，但是並不分配相應的硬碟塊。也就是没有真正佔用文件系统空間。所以你就不用擔心了這個文件佔用了1.2TB的空間了。你可以用[du -h /var/log/lastlog]來查他看到真正佔用硬碟的空間。
+```
