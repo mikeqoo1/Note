@@ -122,7 +122,7 @@ explain 分析一下 SQL 語法
 Command 的值：
 
 ```txt
-Binlog Dump: 主node正在將二進位日志, 同步到从node
+Binlog Dump: 主node正在將二進位log, 同步到從node
 Change User: 正在執行一個change-user的操作
 Close Stmt: 正在關閉一個Prepared Statement对象
 Connect: 一個node連上了主node
@@ -250,4 +250,61 @@ SHOW STATUS LIKE '%connected';
 
 匯入
 mysql -h ip -u username -p dbname < tablename.sql
+
+## 審計log (MariaDB Audit Plugin)
+
+
+MariaDB Audit Plugin[https://mariadb.com/kb/en/mariadb-audit-plugin/]
+
+豐富的審計内容：包括User連線，關閉，DML操作，過程，觸發事件，事件等。
+靈活的審計策略：可以自定義審計事件，例如過濾掉select查詢，或者排除審計某个User等。
+靈活方便：免費使用，可以在線打開和停用審計功能。
+
+```txt
+MariaDB [(none)]> show variables like '%server_audit%';
++-------------------------------+-----------------------+
+| Variable_name                 | Value                 |
++-------------------------------+-----------------------+
+| server_audit_events           |                       |
+| server_audit_excl_users       |                       |
+| server_audit_file_path        | server_audit.log      |
+| server_audit_file_rotate_now  | OFF                   |
+| server_audit_file_rotate_size | 1000000               |
+| server_audit_file_rotations   | 9                     |
+| server_audit_incl_users       |                       |
+| server_audit_logging          | OFF                   |
+| server_audit_mode             | 0                     |
+| server_audit_output_type      | file                  |
+| server_audit_query_log_limit  | 1024                  |
+| server_audit_syslog_facility  | LOG_USER              |
+| server_audit_syslog_ident     | mysql-server_auditing |
+| server_audit_syslog_info      |                       |
+| server_audit_syslog_priority  | LOG_INFO              |
++-------------------------------+-----------------------+
+server_audit_events：指定紀錄事件的類型，可以用逗號分隔的多個值(connect,query,table)，默認為空代表審計所有事件
+server_audit_excl_users：User白名單，該列表中的User行為將不紀錄
+server_audit_file_path：存log的文件，默認在var/lib/mysql的 server_audit.log 文件中
+server_audit_file_rotate_now：强制log文件輪轉
+server_audit_file_rotate_size：限制log文件的大小
+server_audit_file_rotations：指定log文件的數量，如果為0 log將從不輪轉
+server_audit_incl_users：指定哪些User的活動將紀錄，connect將不受此變量影響，該變量比 server_audit_excl_users 優先級高
+server_audit_loc_info: 内部参數，用不到
+server_audit_logging：啟動或關閉審計，默認OFF，啟動ON
+server_audit_mode：識別版本，用於開發和測試
+server_audit_output_type：指定log輸出類型，可為SYSLOG或FILE
+server_audit_query_log_limit: 紀錄中查詢的結果的長度限制。默認為1024
+server_audit_syslog_facility：默認為LOG_USER，指定facility
+server_audit_syslog_ident：設置ident，作為每個syslog紀錄的一部分
+server_audit_syslog_info：指定的info的結果將添加到syslog紀錄
+server_audit_syslog_priority：定義紀錄log優先級
+
+線上設定
+set global server_audit_logging=on;
+
+config設定
+server_audit_logging=on
+```
+
+
+
 
