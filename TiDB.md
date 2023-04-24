@@ -28,8 +28,9 @@ MaxSessions=20
 
 3. 產生佈署文件
 
-tuip cluster template > topo.yaml
+[YAML文檔詳細解說](https://docs.pingcap.com/zh/tidb/dev/tiup-cluster-topology-reference)
 
+tuip cluster template > topo.yaml
 ```yaml
 # # Global variables are applied to all deployments and used as the default value of
 # # the deployments if a specific deployment value is missing.
@@ -83,6 +84,7 @@ tikv_servers:
 
 tiflash_servers:
  - host: 192.168.xxx.xxx
+   tcp_port: 9001
 
 monitoring_servers:
  - host: 192.168.xxx.xxx
@@ -91,24 +93,37 @@ grafana_servers:
  - host: 192.168.xxx.xxx
 ```
 
-4. 佈署
+4. 檢查集群存在的潛在風險
 
 ```bash
-tiup cluster deploy tidb-test v5.4.0 ./topo.yaml --user root -p
+tiup cluster check ./topology.yaml --user root [-p] [-i /home/root/.ssh/gcp_rsa]
+```
+5. 自動修復集群存在的潛在風險
+
+```bash
+tiup cluster check ./topology.yaml --apply --user root [-p] [-i /home/root/.ssh/gcp_rsa]
+```
+6. 部署 TiDB 集群
+
+```bash
+tiup cluster deploy tidb-test v7.0.0 ./topology.yaml --user root [-p] [-i /home/root/.ssh/gcp_rsa]
 ```
 
-5. 查看TiUP管理的集群
+7. 查看TiUP管理的集群
 
 ```bash
 tiup cluster list
 ```
 
-6. 查看剛剛佈署好tidb-test
+8. 查看剛剛佈署好tidb-test
 
 ```bash
 tiup cluster display tidb-test
 ```
 
+mysql --host <tidb_server_host> --port 4000 -u root -p --comments
+
+TiDB dashboard http://192.168.?.?:2379/dashboard/
 
 TiDB Lightning原理 高速導入資料到TiDB
 
@@ -180,13 +195,13 @@ https://docs.pingcap.com/zh/tidb/stable/quick-start-create-task
 4. 配置DM連MariaDB的設定檔
 
 ```ini
-source-id: "mysql-234"    # 数据源 ID，在数据迁移任务配置和 dmctl 命令行中引用该 source-id 可以关联到对应的数据源
+source-id: "mysql-234"    # 數據源 ID，在數據迁移任务配置和 dmctl 命令行中引用该 source-id 可以关联到对应的數據源
 
 from:
   host: "192.168.199.234"
   port: 3306
   user: "syncer"
-  password: "EejxfhQDBMnL5MNqFglnPkDD52fxWhQ=" # 推荐使用 dmctl 对上游数据源的用户密码加密之后的密碼
+  password: "EejxfhQDBMnL5MNqFglnPkDD52fxWhQ=" # 推薦使用 dmctl 对上游數據源的用户密码加密之后的密碼
 
 purge:
   interval: 3600
