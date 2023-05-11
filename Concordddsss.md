@@ -169,6 +169,16 @@ wsrep_sst_method         = rsync
 # Galera Node Configuration
 wsrep_node_address       = "192.168.0.1"
 wsrep_node_name          = "node1"
+
+
+# audit Log
+server_audit_logging          = ON
+server_audit_events           = connect,query_ddl,query_dml,query_dcl,table
+plugin-load-add               = server_audit.so
+server_audit_output_type      = file
+server_audit_file_rotate_now  = ON
+server_audit_file_rotate_size = 5G
+server_audit_file_rotations   = 10
 ```
 
 防火牆開啟

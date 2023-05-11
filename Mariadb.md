@@ -256,6 +256,23 @@ mysql -h ip -u username -p dbname < tablename.sql
 
 MariaDB Audit Plugin[https://mariadb.com/kb/en/mariadb-audit-plugin/]
 
+Locating the Plugin
+
+```sql
+SHOW GLOBAL VARIABLES LIKE 'plugin_dir';
++---------------+--------------------------+
+| Variable_name | Value                    |
++---------------+--------------------------+
+| plugin_dir    | /usr/lib64/mysql/plugin/ |
++---------------+--------------------------+
+```
+
+Installing the Plugin
+
+```sql
+INSTALL SONAME 'server_audit';
+```
+
 豐富的審計内容：包括User連線，關閉，DML操作，過程，觸發事件，事件等。
 靈活的審計策略：可以自定義審計事件，例如過濾掉select查詢，或者排除審計某个User等。
 靈活方便：免費使用，可以在線打開和停用審計功能。
