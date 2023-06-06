@@ -331,3 +331,14 @@ sudo dnf -y groupinstall "Development Tools"
 
 - https://ciq.co/blog/top-10-things-to-do-after-rocky-linux-9-install/
 
+### GitLab搬遷換主機要幹麻
+
+先把資料壓縮起來
+1. sudo tar -czvf 235opt.tar.gz opt/
+把資料移出來
+2. sudo scp 235opt.tar.gz root@192.168.199.234:/opt
+把腳本移出來
+3. scp docker-compose.yml SonarQube.yml 192.168.199.234:~
+修改腳本內容的IP
+4. vi docker-compose.yml / vi SonarQube.yml
+5. 在開啟腳本就好了
