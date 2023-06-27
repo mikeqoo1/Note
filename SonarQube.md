@@ -4,12 +4,12 @@
 
 ```txt
 docker pull sonarqube
-sudo docker run --name sonarqube \
+sudo docker run --name sonarqube --privileged=true \
 -v /opt/sonarqube/logs:/opt/sonarqube/logs \
 -v /opt/sonarqube/conf:/opt/sonarqube/conf \
 -v /opt/sonarqube/data:/opt/sonarqube/data \
 -v /opt/sonarqube/extensions:/opt/sonarqube/extensions \
--p 192.168.199.235:9000:9000 -d sonarqube
+-p 192.168.199.235:9000:9000 -d sonarqube:8.9-community
 ```
 
 ## C/C++的檢測
@@ -42,7 +42,7 @@ source ~/.bashrc
 
 # 先去下載套件 https://github.com/SonarOpenCommunity/sonar-cxx
 
-# 丟到容器裡面 sudo docker cp sonar-cxx-plugin-2.0.7.3119.jar sonarqube:/opt/sonarqube/extensions/plugins
+# 丟到容器裡面 sudo docker cp sonar-cxx-plugin-2.0.7.3119.jar sonarqube:/opt/sonarqube/extensions/plugins/
 
 # 重新啟動 sudo docker restart sonarqube
 
@@ -88,13 +88,38 @@ sonar.scm.disabled=true
 sudo sonar-scanner -Dsonar.login=sqp_519ee049214c43848b05d45d9d4285d6acd6b3fa
 ```
 
+```SonarQube.yml
+version: "3"
 
+services:
+  sonarqube:
+    image: sonarqube:community
+    depends_on:
+      - db
+    environment:
+      SONAR_JDBC_URL: jdbc:postgresql://db:5432/sonar
+      SONAR_JDBC_USERNAME: sonar
+      SONAR_JDBC_PASSWORD: sonar
+    volumes:
+      - /opt/sonarqube/data:/opt/sonarqube/data
+      - /opt/sonarqube/extensions:/opt/sonarqube/extensions
+      - /opt/sonarqube/logs:/opt/sonarqube/logs
+      - /opt/sonarqube/conf:/opt/sonarqube/conf
+    ports:
+      - "9000:9000"
+  db:
+    image: postgres:12
+    environment:
+      POSTGRES_USER: sonar
+      POSTGRES_PASSWORD: sonar
+    volumes:
+      - postgresql:/var/lib/postgresql
+      - postgresql_data:/var/lib/postgresql/data
 
-
-
-
-
-
-
-
-
+volumes:
+  sonarqube_data:
+  sonarqube_extensions:
+  sonarqube_logs:
+  postgresql:
+  postgresql_data:
+```

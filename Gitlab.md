@@ -3,6 +3,10 @@ sudo docker docker run -d --name gitlab-runner-mike --restart always -v /opt/git
 
 docker run -d --name gitlab-runner-docker --restart always -v /opt/gitlab-runner/config:/etc/gitlab-runner -v /var/run/docker.sock:/var/run/docker.sock gitlab/gitlab-runner:latest
 
+GitLab的備份.....
+gitlab:backup:restore 
+
+
 ###### GitRunnerConfig
 
 1. sudo docker exec -it  3623b7e33b35 /bin/bash
