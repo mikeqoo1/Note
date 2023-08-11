@@ -7,7 +7,7 @@
 檔案內容如下 
 [mariadb]
 name = MariaDB
-baseurl = http://yum.mariadb.org/10.4/centos8-amd64
+baseurl = http://yum.mariadb.org/10.9/rhel9-amd64
 gpgkey=https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
 gpgcheck=1
 
