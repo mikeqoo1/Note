@@ -7,20 +7,13 @@ services:
     command:
     - --loglevel warning
     volumes:
-    - /srv/docker/gitlab/redis:/data:Z
+    - /opt/redis:/data:Z
 
   postgresql:
     restart: always
     image: sameersbn/postgresql:12-20200524
-    cap_add:
-    - ALL
-    # command:
-    # - --cap-add=AUDIT_WRITE
-    # securityContext:
-    #   capabilities:
-    #     add: ["AUDIT_WRITE"]
     volumes:
-    - /srv/docker/gitlab/postgresql:/var/lib/postgresql:Z
+    - /opt/postgresql:/var/lib/postgresql:Z
     environment:
     - DB_USER=gitlab
     - DB_PASS=password
@@ -29,27 +22,22 @@ services:
 
   gitlab:
     restart: always
-    image: sameersbn/gitlab:14.8.2
-    cap_add:
-    - ALL
-    # securityContext:
-    #   capabilities:
-    #     add: ["AUDIT_WRITE"]
+    image: sameersbn/gitlab:16.1.0
     depends_on:
     - redis
     - postgresql
     ports:
-    - "30080:80"
-    - "30022:22"
-    - "30000:443"
+    - "30001:80"
+    - "30023:22"
+    - "30444:443"
     volumes:
-    - /srv/docker/gitlab/gitlab:/home/git/data:Z
+    - /opt/gitlab:/home/git/data:Z
     healthcheck:
       test: ["CMD", "/usr/local/sbin/healthcheck"]
-      interval: 1m
+      interval: 5m
       timeout: 10s
       retries: 3
-      start_period: 1m
+      start_period: 5m
     environment:
     - DEBUG=false
     - DB_ADAPTER=postgresql
@@ -62,15 +50,15 @@ services:
     - REDIS_HOST=redis
     - REDIS_PORT=6379
 
-    - TZ=Asia/Kolkata
-    - GITLAB_TIMEZONE=Kolkata
+    - TZ=Asia/Taipei
+    - GITLAB_TIMEZONE=Taipei
 
-    - GITLAB_HTTPS=true
-    - SSL_SELF_SIGNED=true
+    - GITLAB_HTTPS=false
+    - SSL_SELF_SIGNED=false
 
-    - GITLAB_HOST=192.168.199.236
-    - GITLAB_PORT=30000
-    - GITLAB_SSH_PORT=30022
+    - GITLAB_HOST=192.168.199.235
+    - GITLAB_PORT=30001
+    - GITLAB_SSH_PORT=30023
     - GITLAB_RELATIVE_URL_ROOT=
     - GITLAB_SECRETS_DB_KEY_BASE=long-and-random-alphanumeric-string
     - GITLAB_SECRETS_SECRET_KEY_BASE=long-and-random-alphanumeric-string
