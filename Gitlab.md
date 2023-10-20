@@ -1,6 +1,6 @@
-# GitLab的啟動
+# GitLab 的啟動
 
-這邊採用人家的腳本[GitHub在這邊](https://github.com/sameersbn/docker-gitlab)
+這邊採用人家的腳本[GitHub 在這邊](https://github.com/sameersbn/docker-gitlab)
 
 記得要把本地資料夾建好
 - /opt/redis 
@@ -19,16 +19,16 @@ ports:
 - GITLAB_SSH_PORT=30023
 ```
 
-GitLab的備份如下
+GitLab 的備份如下
 
 ```txt
 - GITLAB_BACKUP_SCHEDULE=daily
 - GITLAB_BACKUP_TIME=01:00
 ```
 
-[backups的說明](https://github.com/sameersbn/docker-gitlab#maintenance)
+[backups 的說明](https://github.com/sameersbn/docker-gitlab#maintenance)
 
-# GitLab-Runner的啟動
+# GitLab-Runner 的啟動
 
 ```txt
 sudo docker run -d --name gitlab-runner-docker --restart always -v /opt/gitlab-runner/config:/etc/gitlab-runner -v /var/run/docker.sock:/var/run/docker.sock gitlab/gitlab-runner:latest
@@ -39,7 +39,7 @@ sudo docker run -d --name gitlab-runner-docker --restart always -v /opt/gitlab-r
 憑證管理
 1. docker cp FG4H1FT922900264.crt gitlab-runner-docker:/etc/ssl/certs
 2. docker cp certificate.crt gitlab-runner-docker:/etc/ssl/certs
-3. 記得要重起整個Docker服務 systemctl  restart  docker.service 
+3. 記得要重起整個 Docker 服務 systemctl  restart  docker.service 
 
 先進去
 4. sudo docker exec -it  gitlab-runner-docker /bin/bash
