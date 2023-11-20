@@ -385,7 +385,7 @@ nmcli con up example
 nmcli con modify 網卡名稱 參數
 ```
 
-## 開啟 gdb
+## 開啟 gdb core file
 
 ```bash
 ulimit -c unlimited (要永久生效 把這段加在/etc/profile)
