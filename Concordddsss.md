@@ -351,3 +351,17 @@ sudo dnf -y groupinstall "Development Tools"
 修改腳本內容的 IP
 4. vi docker-compose.yml / vi SonarQube.yml
 5. 在開啟腳本就好了
+
+### Rocky 9 安裝信箱功能
+
+1. sudo dnf install s-nail
+2. sudo dnf install postfix
+3. sudo systemctl restart postfix
+
+另外有一個郵件檢查功能可以關掉, 有時候出現這個的時候
+You have new mail in /var/spool/mail/xxx
+
+可以用 cat /var/spool/mail/xxx 來查看, 也可以關掉但是一定要用 root
+
+1. echo "unset MAILCHECK">> /etc/profile
+2. source /etc/profile
