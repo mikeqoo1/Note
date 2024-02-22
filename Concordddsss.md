@@ -1,9 +1,9 @@
-# 康x技能包
+# 康 x 技能包
 
 ## 憑證問題
 
 ```bash
-先把IE的憑證匯出來, ??????.cer
+先把 IE 的憑證匯出來，??????.cer
 
 上網 處理方法 For Ubuntu
 sudo cp ??????.cer /etc/ssl/certs
@@ -20,7 +20,7 @@ sudo cp ??????.cer /etc/pki/ca-trust/source/anchors/
 sudo update-ca-trust
 ```
 
-## 系統裝機手冊2.0
+## 系統裝機手冊 2.0
 
 ```linux
 sudo dnf update
@@ -29,12 +29,12 @@ sudo dnf install htop
 
 遠端桌面選配安裝
 
-先裝GUI桌面
+先裝 GUI 桌面
 dnf groupinstall "Server with GUI" -y
 systemctl set-default graphical
 reboot
 
-再裝xrdp服務
+再裝 xrdp 服務
 dnf install --nogpgcheck https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm -y
 dnf install xrdp tigervnc-server -y
 systemctl start xrdp
@@ -55,14 +55,23 @@ npm config set cafile "~/certificate.crt"
 
 ```
 
-## 安裝 MariaDB 10.6
+## 安裝 MariaDB 10.5 10.6 10.9
 
 sudo vi /etc/yum.repos.d/mariadb.repo
 
 ```ini
 [mariadb] 
 name = MariaDB 
-baseurl = http://yum.mariadb.org/10.6/rhel8-amd64 
+baseurl = http://yum.mariadb.org/10.5/rhel9-amd64 
+module_hotfixes=1 
+gpgkey=https://yum.mariadb.org/RPM-GPG-KEY-MariaDB 
+gpgcheck=1
+```
+
+```ini
+[mariadb] 
+name = MariaDB 
+baseurl = http://yum.mariadb.org/10.6/rhel9-amd64 
 module_hotfixes=1 
 gpgkey=https://yum.mariadb.org/RPM-GPG-KEY-MariaDB 
 gpgcheck=1
@@ -98,7 +107,7 @@ sudo vim /etc/hosts
 
 sudo vi /etc/my.cnf
 
-設定檔複製到節點2 節點3 ip 名稱換一換
+設定檔複製到節點 2 節點 3 ip 名稱換一換
 
 ```ini
 #
@@ -115,13 +124,13 @@ sudo vi /etc/my.cnf
 character-set-server    = 'utf8mb4'
 collation-server        = 'utf8mb4_unicode_ci'
 #datadir                  = /database/mariadb
-skip_character_set_client_handshake = 1   #跳過mysql登入時候的字符集參數設定 使用Server端的設定
+skip_character_set_client_handshake = 1   #跳過 mysql 登入時候的字符集參數設定 使用 Server 端的設定
 binlog_format            = ROW
 #binlog_format            = MIXED
-# 基於語句紀錄： STATEMENT，只紀錄語句。該模式存在弊端，比如執行"UPDATE students SET birth = now();"無法保存具体的時間戳記，若按照該語句進行還原準確性肯定出現問題。
+# 基於語句紀錄： STATEMENT，只紀錄語句。該模式存在弊端，比如執行 "UPDATE students SET birth = now ();" 無法保存具体的時間戳記，若按照該語句進行還原準確性肯定出現問題。
 # 基於行紀錄：ROW，只紀錄數據，即直接將數據存下来，但檔案大小較大。適合資料相對重要的場景。資料恢复時準確性的最高，但需要犧牲更多的硬碟空間。
 # 混合模式： MIXED 系统自行判定該用哪個方式存
-#MariaDB 5.5.x默認STATEMENT, 而MariaDB 10.2.x默認MIXED
+#MariaDB 5.5.x 默認 STATEMENT, 而 MariaDB 10.2.x 默認 MIXED
 default-storage-engine   = innodb
 innodb_autoinc_lock_mode = 2
 bind-address             = 0.0.0.0
@@ -134,16 +143,16 @@ net_buffer_length       = 65536
 general_log              = 1
 general_log_file         = /var/lib/mysql/mariadb.log
 
-slow_query_log           = 1 #0=關閉 1=打開
+slow_query_log           = 1 #0 = 關閉 1 = 打開
 slow_query_log_file      = /var/lib/mysql/query_slow.log
-long_query_time          = 0.1 #執行超過0.1秒
+long_query_time          = 0.1 #執行超過 0.1 秒
 
 log-error                = /var/lib/mysql/error.log
 log_bin_trust_function_creators = 1
 log_bin                  = /var/lib/mysql/mariadb_bin.log
-max_binlog_size          = 1073741824 #log大小
-sync_binlog              = 0 #設定是否啟動binlog即时同步硬碟功能，默認0，由操作系统負責同步log到硬碟
-expire_logs_days         = 3 #保留3天
+max_binlog_size          = 1073741824 #log 大小
+sync_binlog              = 0 #設定是否啟動 binlog 即时同步硬碟功能，默認 0，由操作系统負責同步 log 到硬碟
+expire_logs_days         = 3 #保留 3 天
 
 max_connections             = 8192
 
@@ -192,7 +201,7 @@ sudo firewall-cmd --permanent --zone=public --add-port=4567/udp
 sudo firewall-cmd --reload
 ```
 
-關閉SELINUX
+關閉 SELINUX
 
 vi /etc/selinux/config
 
@@ -220,7 +229,7 @@ make -j $(nproc) TARGET=linux-glibc USE_OPENSSL=1 USE_LUA=1 USE_PCRE=1 USE_SYSTE
 sudo make install
 ```
 
-haproxy檢查與重啟概念
+haproxy 檢查與重啟概念
 
 ```bash
 haproxy -v  #Version
@@ -235,15 +244,15 @@ sudo mkdir /var/lib/haproxy
 ## GitLab
 
 ```bash
-# 1.產生private key
+# 1. 產生 private key
 openssl genrsa -out gitlab.key 2048
-# 2.某某vm或服務(例如:iis、apache)產生certificate signing request (CSR)
+# 2. 某某 vm 或服務 (例如:iis、apache) 產生 certificate signing request (CSR)
 openssl req -new -key gitlab.key -out gitlab.csr
-# 3.作簽章(用private key對CSR作簽章)
+# 3. 作簽章 (用 private key 對 CSR 作簽章)
 openssl x509 -req -days 3650 -in gitlab.csr -signkey gitlab.key -out gitlab.crt
-# 4. 產生stronger DHE parameters 
+# 4. 產生 stronger DHE parameters 
 openssl dhparam -out dhparam.pem 2048
-sudo mkdir -p /srv/docker/gitlab/gitlab/certs # 這是host的目錄喔，會對到gitlab的/home/git/data
+sudo mkdir -p /srv/docker/gitlab/gitlab/certs # 這是 host 的目錄喔，會對到 gitlab 的 /home/git/data
 sudo mkdir -p /srv/docker/gitlab/postgresql
 sudo mkdir -p /srv/docker/gitlab/redis
 sudo cp gitlab.key /srv/docker/gitlab/gitlab/certs/
@@ -290,7 +299,7 @@ sudo podman run --cap-add=AUDIT_WRITE --pod concords --add-host=192.168.199.236 
 sudo podman run --name mother_gift -d -p 9104:9104 -e DATA_SOURCE_NAME="exporter:Aa1234@(EMST-Test03:3306)/" prom/mysqld-exporter
 ```
 
-找容器內部的ip
+找容器內部的 ip
 
 ```txt
 sudo podman inspect mother_gift | grep IPAddress
@@ -302,18 +311,18 @@ sudo podman inspect mother_gift | grep IPAddress
 docker run -d -p 9104:9104 --network my-mysql-network  -e DATA_SOURCE_NAME="exporter:Aa1234@(192.168.199.235:3306)/" prom/mysqld-exporter
 
 
-要用這個IP去建立DB User
+要用這個 IP 去建立 DB User
 
 ```txt
 CREATE USER exporter@10.88.2.37 IDENTIFIED BY 'Aa1234' WITH MAX_USER_CONNECTIONS 3;
 grant ALL PRIVILEGES on *.* to 'exporter'@'10.88.2.37'
 ```
 
-先認識Bridge 
+先認識 Bridge 
 
 - https://www.cnblogs.com/bakari/p/10529575.html
 
-Podman網路說明
+Podman 網路說明
 
 - https://www.i4k.xyz/article/chenmozhe22/113941733
 
@@ -331,7 +340,7 @@ sudo dnf -y groupinstall "Development Tools"
 
 - https://ciq.co/blog/top-10-things-to-do-after-rocky-linux-9-install/
 
-### GitLab搬遷換主機要幹麻
+### GitLab 搬遷換主機要幹麻
 
 先把資料壓縮起來
 1. sudo tar -czvf 235opt.tar.gz opt/
@@ -339,6 +348,6 @@ sudo dnf -y groupinstall "Development Tools"
 2. sudo scp 235opt.tar.gz root@192.168.199.234:/opt
 把腳本移出來
 3. scp docker-compose.yml SonarQube.yml 192.168.199.234:~
-修改腳本內容的IP
+修改腳本內容的 IP
 4. vi docker-compose.yml / vi SonarQube.yml
 5. 在開啟腳本就好了

@@ -1,6 +1,6 @@
 # GitLab 的啟動
 
-這邊採用人家的腳本[GitHub 在這邊](https://github.com/sameersbn/docker-gitlab)
+這邊採用人家的腳本 [GitHub 在這邊](https://github.com/sameersbn/docker-gitlab)
 
 記得要把本地資料夾建好
 - /opt/redis 
