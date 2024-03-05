@@ -46,3 +46,38 @@ sudo docker run -d --name gitlab-runner-docker --restart always -v /opt/gitlab-r
 
 在註冊
 5. gitlab-runner register
+
+# GitLab CI/CD 製造 C# 的環境
+
+1. sudo docker pull mono:latest
+
+2. sudo docker run -d --name cicdmono -v /home/windowsmono:/tmp/host -it mono bash
+
+3. 把憑證丟進去 sudo docker cp certificate.crt cicdmono:/usr/local/share/ca-certificates/
+
+4. 把憑證丟進去 sudo docker cp FG4H1FT922900264.crt cicdmono:/usr/local/share/ca-certificates/
+
+5. update-ca-certificates
+
+6. sudo docker exec -it cicdmono /bin/bash
+
+7. cp FG4H1FT922900264.crt /etc/ssl/certs
+
+8. cp certificate.crt /etc/ssl/certs
+
+9. apt-get update
+
+10. apt-get install -y openjdk-11-jdk
+
+11. apt-get install -y wget
+
+12. apt-get install -y unzip
+
+13. mkdir scanner && cd scanner
+
+14. wget https://github.com/SonarSource/sonar-scanner-msbuild/releases/download/5.15.0.80890/sonar-scanner-msbuild-5.15.0.80890-net46.zip (用本地複製到容器裡)
+
+15. unzip sonar-scanner-msbuild-5.15.0.80890-net46.zip
+
+16. chmod +x sonar-scanner-4.8.1.3023/bin/sonar-scanner
+

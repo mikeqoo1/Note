@@ -18,6 +18,10 @@ sudo snap set system store-certs.cert1="$(cat /path/xxxx.pem)"
 For Rocky/CentOS
 sudo cp ??????.cer /etc/pki/ca-trust/source/anchors/
 sudo update-ca-trust
+
+For Docke 容器裡
+cp ??????.cer ?????.crt /usr/local/share/ca-certificates/
+update-ca-certificates
 ```
 
 ## 系統裝機手冊 2.0
