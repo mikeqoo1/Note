@@ -81,3 +81,6 @@ sudo docker run -d --name gitlab-runner-docker --restart always -v /opt/gitlab-r
 
 16. chmod +x sonar-scanner-4.8.1.3023/bin/sonar-scanner
 
+[文章參考](https://dennys.github.io/en/doc/devops/gitlab-sonarqube-integration-dotnet/)
+
+[文章參考](https://dennys.github.io/en/doc/devops/sonarqube-mono-dotnet4-integration/)
