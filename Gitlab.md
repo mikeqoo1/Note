@@ -84,3 +84,37 @@ sudo docker run -d --name gitlab-runner-docker --restart always -v /opt/gitlab-r
 [文章參考](https://dennys.github.io/en/doc/devops/gitlab-sonarqube-integration-dotnet/)
 
 [文章參考](https://dennys.github.io/en/doc/devops/sonarqube-mono-dotnet4-integration/)
+
+# C# .Net Core 的源碼掃描
+
+235 本機裝這些套件後, 讓 Runner 用 SSH 的方法連線執行
+
+套件安裝如下
+
+```bash
+sudo dnf install dotnet-host
+sudo dnf install dotnet-sdk-8.0 
+dotnet tool install --global dotnet-sonarscanner
+export PATH=\"$PATH:$HOME/.dotnet/tools\""
+```
+
+GitLab Runner 要改成用 ssh 的方式 Like this
+
+```bash
+[[runners]]
+  name = "shellPushServer"
+  url = "http://GitLabIP:30001/"
+  id = 25
+  token = "專案偷肯"
+  token_obtained_at = 2024-03-11T10:36:36Z
+  token_expires_at = 0001-01-01T00:00:00Z
+  executor = "ssh"
+  [runners.cache]
+    MaxUploadedArchiveSize = 0
+  [runners.ssh]
+    user = "主機帳號"
+    password = "主機密碼"
+    host = "主機IP"
+    port = "22"
+    identity_file = "/主機帳號/.ssh/id_rsa"
+```
