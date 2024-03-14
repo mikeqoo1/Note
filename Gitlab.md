@@ -77,7 +77,7 @@ sudo docker run -d --name gitlab-runner-docker --restart always -v /opt/gitlab-r
 
 14. wget https://github.com/SonarSource/sonar-scanner-msbuild/releases/download/5.15.0.80890/sonar-scanner-msbuild-5.15.0.80890-net46.zip (用本地複製到容器裡)
 
-15. unzip sonar-scanner-msbuild-5.15.0.80890-net46.zip
+15. unzip scanner/sonar-scanner-msbuild-5.15.0.80890-net46.zip
 
 16. chmod +x sonar-scanner-4.8.1.3023/bin/sonar-scanner
 
