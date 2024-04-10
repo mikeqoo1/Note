@@ -215,6 +215,37 @@ SELINUX=disabled
 
 第一台的啟動 sudo galera_new_cluster 其他 sudo systemctl start mariadb
 
+需要改變存取目錄的話 要更改設定檔跟調整設定
+
+先建立目錄 調整目錄權限 把原本的資料轉移到後來的目錄
+
+```bash
+sudo mkdir /home/Database
+sudo chown -R mysql:mysql /home/Database/
+sudo cp -a /var/lib/mysql /home/Database/
+```
+
+```ini
+# 修改my.cnf
+socket                  = /home/Database/mysql/mysql.sock
+datadir                 = /home/Database
+```
+解除資料夾在home目錄底下的設定
+
+```bash
+sudo vi /etc/systemd/system/mariadb.service.d/galera.conf
+```
+
+```ini
+[Service]
+TimeoutStartSec=0
+ProtectHome=false
+```
+
+```bash
+sudo systemctl daemon-reload
+```
+
 ## Haproxy2.4.8
 
 ```ini
