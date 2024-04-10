@@ -227,7 +227,6 @@ sudo cp -a /var/lib/mysql /home/Database/
 
 ```ini
 # 修改my.cnf
-socket                  = /home/Database/mysql/mysql.sock
 datadir                 = /home/Database
 ```
 解除資料夾在home目錄底下的設定
