@@ -59,7 +59,7 @@ npm config set cafile "~/certificate.crt"
 
 ```
 
-## 安裝 MariaDB 10.5 10.6 10.9
+## 安裝 MariaDB 10.5 10.6 10.11 LTS
 
 sudo vi /etc/yum.repos.d/mariadb.repo
 
@@ -84,7 +84,7 @@ gpgcheck=1
 ```ini
 [mariadb]
 name = MariaDB
-baseurl = http://yum.mariadb.org/10.9/rhel9-amd64
+baseurl = http://yum.mariadb.org/10.11/rhel9-amd64
 module_hotfixes=1
 gpgkey=https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
 gpgcheck=1 
