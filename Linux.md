@@ -221,11 +221,11 @@ sudo mkdir -p SFTP_DIRECTORY (ex:/var/sftp/abc)
 ```
 
 ```bash
-sudo chown root:root SFTP_DIRECTORY_ROOT (ex:/var/sftp)
+sudo chown root:root SFTP_DIRECTORY_ROOT (ex:/var/sftp) (r6emst)
 ```
 
 ```bash
-sudo chmod 755 SFTP_DIRECTORY_ROOT
+sudo chmod 755 SFTP_DIRECTORY_ROOT (r6emst)
 ```
 
 ```bash

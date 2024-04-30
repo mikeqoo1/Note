@@ -222,7 +222,7 @@ SELINUX=disabled
 ```bash
 sudo mkdir /home/Database
 sudo chown -R mysql:mysql /home/Database/
-sudo cp -a /var/lib/mysql /home/Database/
+sudo cp -a /var/lib/mysql/* /home/Database
 ```
 
 ```ini
