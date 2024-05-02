@@ -325,7 +325,7 @@ sudo podman run --cap-add=AUDIT_WRITE --pod concords --add-host=192.168.199.236 
     --volume /srv/docker/gitlab/gitlab:/home/git/data sameersbn/gitlab:14.8.2
 ```
 
-### 母親節禮物
+## 母親節禮物
 
 先啟動
 
@@ -368,13 +368,13 @@ Podman 網路說明
 
 
 
-### 灌好系統後要做的事情
+## 灌好系統後要做的事情
 
 sudo dnf -y groupinstall "Development Tools"
 
 - https://ciq.co/blog/top-10-things-to-do-after-rocky-linux-9-install/
 
-### GitLab 搬遷換主機要幹麻
+## GitLab 搬遷換主機要幹麻
 
 先把資料壓縮起來
 1. sudo tar -czvf 235opt.tar.gz opt/
@@ -386,7 +386,7 @@ sudo dnf -y groupinstall "Development Tools"
 4. vi docker-compose.yml / vi SonarQube.yml
 5. 在開啟腳本就好了
 
-### Rocky 9 安裝信箱功能
+## Rocky 9 安裝信箱功能
 
 1. sudo dnf install s-nail
 2. sudo dnf install postfix
