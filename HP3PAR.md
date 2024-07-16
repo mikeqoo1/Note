@@ -119,7 +119,7 @@ sr0          11:0    1 1024M  0 rom
 8. 對 mpatha 創建文件系統
 
 ```sh
-sudo mkfs.ext4 /dev/mapper/mpatha
+sudo mkfs.xfs /dev/mapper/mpatha
 ```
 
 9. 掛載多路徑設備
@@ -140,3 +140,39 @@ sudo mount /dev/mapper/mpatha /mnt/3par_data
 df -h /mnt/3par_data
 ```
 
+- 查看系統文件
+
+```bash
+lsblk -f
+NAME        FSTYPE       FSVER    LABEL UUID                                   FSAVAIL FSUSE% MOUNTPOINTS
+sda                                                                                           
+├─sda1      vfat         FAT32          2B28-C5C4                               591.8M     1% /boot/efi
+├─sda2      xfs                         e2b7c9b9-16ea-4dc8-8ae5-3045e59bd57a    729.5M    27% /boot
+└─sda3      LVM2_member  LVM2 001       Ifcceq-uQwq-TCh4-FVbR-IPeR-Ej2i-jtdRN0                
+  ├─rl-root xfs                         349e923b-0264-4349-a230-42fcd4a5b357     58.3G    17% /
+  ├─rl-swap swap         1              9de4eded-4943-4c6d-ae05-74e947f09709                  [SWAP]
+  └─rl-home xfs                         1c0850af-8737-4bb6-9e76-98b26400e07c      1.6T     2% /home
+sdb         mpath_member                                                                      
+└─mpatha                                                                                      
+sdc         mpath_member                                                                      
+└─mpatha                                                                                      
+sdd         mpath_member                                                                      
+└─mpatha                                                                                      
+sde         mpath_member                                                                      
+└─mpatha                                                                                      
+sr0
+```
+
+- 檢查多路徑設備（multipath devices）
+
+```bash
+sudo multipath -ll
+[sudo] password for crcft: 
+mpatha (360002ac0000000000000000f00028638) dm-3 3PARdata,VV
+size=1.0T features='1 queue_if_no_path' hwhandler='1 alua' wp=rw
+`-+- policy='service-time 0' prio=50 status=active
+  |- 25:0:0:0 sdb 8:16 active ready running
+  |- 25:0:2:0 sdc 8:32 active ready running
+  |- 26:0:1:0 sdd 8:48 active ready running
+  `- 26:0:2:0 sde 8:64 active ready running
+```
