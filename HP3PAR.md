@@ -42,11 +42,18 @@ sudo vi /etc/multipath.conf
 
 defaults {
     user_friendly_names yes
-    find_multipaths no
+    find_multipaths yes
 }
 
 blacklist {
-    devnode "^sd[a]"
+    devnode "^sda[0-9]*"
+}
+
+multipaths {
+    multipath {
+        wwid    360002ac0000000000000000f00028638
+        alias   mpatha
+    }
 }
 
 devices {
@@ -54,14 +61,35 @@ devices {
         vendor "3PARdata"
         product "VV"
         path_grouping_policy group_by_prio
+        prio alua
         path_checker tur
         no_path_retry queue
-        hardware_handler "0"
-        prio alua
-        failback immediate
+        rr_weight priorities
+        rr_min_io 100
     }
 }
 ```
+
+### 配置文件說明
+
+1. defaults 部分：
+    - user_friendly_names yes：啟用友好名稱，如 mpatha 代替 WWID。
+    - find_multipaths yes：僅對有多條路徑的設備啟用多路徑。
+2. blacklist 部分：
+    - devnode "^sda[0-9]*"：排除名稱以 sda 開頭的設備和分區。
+3. multipaths 部分：
+    - multipath：定義一個具體的多路徑設備。
+    - wwid 360002ac0000000000000000f00028638：你的設備的 WWID。
+    - alias mpatha：為設備指定的友好名稱 mpatha。
+4. devices 部分：
+    - device：為特定設備類型設置參數。
+      - vendor "3PARdata" 和 product "VV"：廠商和產品名稱。
+      - path_grouping_policy group_by_prio：按優先級分組路徑。
+      - prio alua：使用 ALUA (Asymmetric Logical Unit Access) 作為優先級分配方法。
+      - path_checker tur：使用 Test Unit Ready (TUR) 方法檢查路徑健康狀況。
+      - no_path_retry queue：當所有路徑都不可用時，隊列 I/O。
+      - rr_weight priorities：根據優先級分配輪詢權重。
+      - rr_min_io 100：設置最小 I/O 數為 100，用於優先級輪詢。
 
 4. 載入設定檔
 
