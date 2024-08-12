@@ -12,6 +12,8 @@ services:
   postgresql:
     restart: always
     image: sameersbn/postgresql:12-20200524
+    cap_add:
+    - ALL
     volumes:
     - /opt/postgresql:/var/lib/postgresql:Z
     environment:
@@ -19,17 +21,17 @@ services:
     - DB_PASS=password
     - DB_NAME=gitlabhq_production
     - DB_EXTENSION=pg_trgm,btree_gist
-
   gitlab:
     restart: always
-    image: sameersbn/gitlab:16.1.0
+    image: sameersbn/gitlab:16.3.4
+    cap_add:
+    - ALL
     depends_on:
     - redis
     - postgresql
     ports:
-    - "30001:80"
     - "30023:22"
-    - "30444:443"
+    - "30001:443"
     volumes:
     - /opt/gitlab:/home/git/data:Z
     healthcheck:
@@ -37,9 +39,9 @@ services:
       interval: 5m
       timeout: 10s
       retries: 3
-      start_period: 5m
+      start_period: 1m
     environment:
-    - DEBUG=false
+    - DEBUG=true
     - DB_ADAPTER=postgresql
     - DB_HOST=postgresql
     - DB_PORT=5432
@@ -53,8 +55,8 @@ services:
     - TZ=Asia/Taipei
     - GITLAB_TIMEZONE=Taipei
 
-    - GITLAB_HTTPS=false
-    - SSL_SELF_SIGNED=false
+    - GITLAB_HTTPS=true
+    - SSL_SELF_SIGNED=true
 
     - GITLAB_HOST=192.168.199.235
     - GITLAB_PORT=30001
@@ -70,18 +72,18 @@ services:
     - GITLAB_NOTIFY_ON_BROKEN_BUILDS=true
     - GITLAB_NOTIFY_PUSHER=false
 
-    - GITLAB_EMAIL=110084@concords.com.tw
+    - GITLAB_EMAIL=notifications@example.com
     - GITLAB_EMAIL_REPLY_TO=noreply@example.com
     - GITLAB_INCOMING_EMAIL_ADDRESS=reply@example.com
 
     - GITLAB_BACKUP_SCHEDULE=daily
     - GITLAB_BACKUP_TIME=01:00
 
-    - SMTP_ENABLED=true
-    - SMTP_DOMAIN=exgmail.concords.com.tw
+    - SMTP_ENABLED=false
+    - SMTP_DOMAIN=www.example.com
     - SMTP_HOST=smtp.gmail.com
-    - SMTP_PORT=25
-    - SMTP_USER=gitlab@concords.com.tw
+    - SMTP_PORT=587
+    - SMTP_USER=mailer@example.com
     - SMTP_PASS=password
     - SMTP_STARTTLS=true
     - SMTP_AUTHENTICATION=login
@@ -157,6 +159,32 @@ services:
     - OAUTH_AZURE_API_KEY=
     - OAUTH_AZURE_API_SECRET=
     - OAUTH_AZURE_TENANT_ID=
+
+    - LDAP_ENABLED=true
+    - LDAP_LABEL=LDAP
+    - LDAP_HOST=192.168.199.95
+    - LDAP_PORT=389
+    - LDAP_UID=cn
+    - LDAP_METHOD=plain
+    - LDAP_VERIFY_SSL=true
+    - LDAP_CA_FILE=
+    - LDAP_SSL_VERSION=
+    - LDAP_BIND_DN=cn=admin,dc=concords,dc=com
+    - LDAP_PASS=Aa123456
+    - LDAP_TIMEOUT=10
+    - LDAP_ACTIVE_DIRECTORY=false
+    - LDAP_ALLOW_USERNAME_OR_EMAIL_LOGIN=true
+    - LDAP_BLOCK_AUTO_CREATED_USERS=false
+    - LDAP_BASE=ou=People,dc=concords,dc=com
+    - LDAP_USER_FILTER=
+    - LDAP_USER_ATTRIBUTE_USERNAME=[uid, userid, sAMAccountName, cn]
+    - LDAP_USER_ATTRIBUTE_MAIL=[mail, email, userPrincipalName, Email]
+    - LDAP_USER_ATTRIBUTE_NAME=cn
+    - LDAP_USER_ATTRIBUTE_FIRSTNAME=givenName
+    - LDAP_USER_ATTRIBUTE_LASTNAME=sn
+    - LDAP_LOWERCASE_USERNAMES=false
+    - LDAP_PREVENT_LDAP_SIGN_IN=false
+
 
 volumes:
   redis-data:
