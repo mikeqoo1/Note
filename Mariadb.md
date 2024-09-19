@@ -2,19 +2,23 @@
 
 ## 安裝篇
 
+[LTS 版本檢查](https://endoflife.date/mariadb)
+
+現在用 10.11 跟 11.4 都是最新的 LTS 版本
+
 ```txt
 1.sudo vi /etc/yum.repos.d/MariaDB.repo
 檔案內容如下 
 [mariadb]
 name = MariaDB
-baseurl = http://yum.mariadb.org/10.11/rhel9-amd64
+baseurl = http://yum.mariadb.org/版本/rhel9-amd64
 gpgkey=https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
 gpgcheck=1
 
 2.sudo dnf install boost-program-options
 3.sudo dnf install MariaDB-server MariaDB-client --disablerepo=AppStream 
 4.sudo systemctl enable --now mariadb
-5.sudo mysql_secure_installation
+5.sudo mariadb-secure-installation
 
 更換資料庫的目錄
 1.sudo systemctl stop mariadb
