@@ -390,7 +390,7 @@ nmcli con modify 網卡名稱 參數
 ```bash
 ulimit -c unlimited (要永久生效 把這段加在/etc/profile)
 sudo mkdir /corefile
-sudo chmod 777 corefile/
+sudo chmod 777 /corefile/
 sysctl -w kernel.core_pattern=/corefile/core.%e.%p.%s.%E
 
 DEBUG 步驟
