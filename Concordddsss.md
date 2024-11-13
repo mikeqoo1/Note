@@ -400,3 +400,120 @@ You have new mail in /var/spool/mail/xxx
 
 1. echo "unset MAILCHECK">> /etc/profile
 2. source /etc/profile
+
+## Rocky 安裝 AD 服務
+
+1. sudo dnf -y install realmd sssd oddjob oddjob-mkhomedir adcli samba-common-tools krb5-workstation
+
+2. sudo vi /etc/krb5.conf
+
+```txt
+    default_tkt_enctypes = RC4-HMAC, DES-CBC-CRC, DES3-CBC-SHA1, DES-CBC-MD5
+    default_tgs_enctypes = RC4-HMAC, DES-CBC-CRC, DES3-CBC-SHA1, DES-CBC-MD5
+```
+
+3. Open Firewall
+
+```bash
+sudo firewall-cmd --zone=public --permanent --add-port=53/tcp
+sudo firewall-cmd --zone=public --permanent --add-port=53/udp
+
+# LDAP
+sudo firewall-cmd --zone=public --permanent --add-port=389/tcp
+sudo firewall-cmd --zone=public --permanent --add-port=389/udp
+
+# Samba
+sudo firewall-cmd --zone=public --permanent --add-port=445/tcp
+sudo firewall-cmd --zone=public --permanent --add-port=445/udp
+
+# Kerberos
+sudo firewall-cmd --zone=public --permanent --add-port=88/tcp
+sudo firewall-cmd --zone=public --permanent --add-port=88/udp
+
+sudo firewall-cmd --zone=public --permanent --add-port=464/tcp
+sudo firewall-cmd --zone=public --permanent --add-port=464/udp
+
+# LDAP Global Catalog
+sudo firewall-cmd --zone=public --permanent --add-port=3268/tcp
+
+# NTP
+sudo firewall-cmd --zone=public --permanent --add-port=123/tcp
+sudo firewall-cmd --reload
+```
+
+4. sudo realm join concords.com.tw --user=(網管員編) (輸入密碼)網管員編密碼
+
+5. sudo vi /etc/krb5.conf
+
+```txt
+    #default_tkt_enctypes = RC4-HMAC, DES-CBC-CRC, DES3-CBC-SHA1, DES-CBC-MD5
+    #default_tgs_enctypes = RC4-HMAC, DES-CBC-CRC, DES3-CBC-SHA1, DES-CBC-MD5
+```
+
+6. sudo vi /etc/sssd/sssd.conf
+
+```txt
+    use_fully_qualified_names = False
+```
+
+7. sudo systemctl restart sssd
+
+8. sudo realm deny --all
+
+9. sudo realm permit -g 資訊部
+
+10. 如果連上AD但無法登入時檢查這兩個服務是否正常啟動
+
+```bash
+sudo systemctl status sssd-kcm.socket
+sudo systemctl status sssd-kcm.service
+```
+
+11. 若登入無法自動創建家目錄, 則加入以下設定
+
+``` bash
+sudo vi /etc/pam.d/sshd
+```
+
+12. pam_selinux.so close should be the first session rule
+
+```bash
+session    required     pam_mkhomedir.so skel=/etc/skel/ umask=0077
+```
+
+## Rocky 資料庫裝 AD 服務
+
+1. sudo dnf install gcc pam-devel wget
+
+2. wget <https://raw.githubusercontent.com/MariaDB/server/10.11/plugin/auth_pam/mapper/pam_user_map.c> (這邊要對應資料庫版本)
+
+3. sed -ie 's/config_auth_pam/plugin_auth_common/' pam_user_map.c
+
+4. gcc -I/usr/include/mysql/mysql pam_user_map.c -shared -lpam -fPIC -o pam_user_map.so
+
+5. sudo install --mode=0755 pam_user_map.so /lib64/security/
+
+6. INSTALL SONAME 'auth_pam'; 這段要進資料庫輸入
+
+7. sudo vi /etc/security/user_map.conf
+
+```txt
+@samusers: misuser
+```
+
+8. sudo vi /etc/pam.d/mysqld
+
+```txt
+auth required pam_sss.so
+auth required pam_user_map.so debug
+account required pam_permit.so
+```
+
+9. 進去資料庫輸入
+
+```sql
+CREATE USER 'misuser'@'%' IDENTIFIED BY 'misuser';
+GRANT SELECT ON . TO 'misuser'@'%' ;
+CREATE USER ''@'%' IDENTIFIED VIA pam USING 'mysqld';
+GRANT PROXY ON 'misuser'@'%' TO ''@'%';
+```
