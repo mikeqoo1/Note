@@ -142,7 +142,7 @@ bind-address             = 0.0.0.0
 
 wait_timeout            = 86400   #24hr
 interactive_timeout     = 86400
-max_allowed_packet      = 67108864 #64M
+max_allowed_packet      = 1073741824 #1G
 net_buffer_length       = 65536
 
 general_log              = 1
