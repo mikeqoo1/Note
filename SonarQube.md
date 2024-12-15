@@ -51,6 +51,12 @@ source ~/.bashrc
 https://blog.csdn.net/qq_15559817/article/details/100736498
 ```
 
+要去 Quality Profiles 新增 CXX 的檔案
+![alt text](../img/源碼1.png)
+
+接下來要去 Rules 去把規則打開
+![alt text](../img/源碼2.png)
+
 ## 原始碼覆蓋率 gcovr
 
 ```txt
