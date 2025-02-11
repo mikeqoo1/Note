@@ -8,6 +8,13 @@
 上網 處理方法 For Ubuntu
 sudo cp ??????.cer /etc/ssl/certs
 
+先把 cer to crt
+openssl x509 -in ??????..cer -out ??????.crt -inform DER
+
+手動新增 CA 憑證
+sudo cp ??????.crt /usr/local/share/ca-certificates/
+sudo update-ca-certificates
+
 npm 處理方法
 npm config set cafile "/path/??????.cer"
 
