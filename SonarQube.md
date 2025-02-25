@@ -38,6 +38,12 @@ export PATH=$PATH:/opt/sonar-scanner-????-linux/bin
 # 重新載入 ~/.bashrc 設定
 source ~/.bashrc
 
+# sonar-scanner本地Ubuntu的設定是這樣
+
+解壓縮完後用軟連結的方式處理
+
+sudo ln -s ~/sonar-scanner-7.0.2.4839-linux-x64/bin/sonar-scanner /usr/bin/sonar-scanner
+
 3. sonar-cxx-plugin 的安裝在下面
 
 # 先去下載套件 https://github.com/SonarOpenCommunity/sonar-cxx
