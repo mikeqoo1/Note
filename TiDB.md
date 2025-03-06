@@ -15,7 +15,25 @@ source .bash_profile
 確認指令
 
 ```bash
+which tiup
+```
+
+安裝 TiUP 叢集套件
+
+```bash
 tiup cluster
+```
+
+更新 TiUP 套件至最新版本
+
+```bash
+tiup update --self && tiup update cluster
+```
+
+查看 TiUP 版本資訊
+
+```bash
+tiup --binary cluster
 ```
 
 2. 設定MaxSessions, 改完要重新啟動service sshd restart, 改這個是為了防止多個程式scp文件時ssh登錄超過數量限制
@@ -31,6 +49,7 @@ MaxSessions=20
 [YAML文檔詳細解說](https://docs.pingcap.com/zh/tidb/dev/tiup-cluster-topology-reference)
 
 tuip cluster template > topo.yaml
+
 ```yaml
 # # Global variables are applied to all deployments and used as the default value of
 # # the deployments if a specific deployment value is missing.
@@ -93,20 +112,192 @@ grafana_servers:
  - host: 192.168.xxx.xxx
 ```
 
+TiFlash 部署 (適合 Real-Time HTAP 業務)
+
+```yaml
+# # Global variables are applied to all deployments and used as the default value of
+# # the deployments if a specific deployment value is missing.
+global:
+  user: "tidb"
+  ssh_port: 22
+  deploy_dir: "/tidb-deploy"
+  data_dir: "/tidb-data"
+
+# # Monitored variables are applied to all the machines.
+monitored:
+  node_exporter_port: 9100
+  blackbox_exporter_port: 9115
+  # deploy_dir: "/tidb-deploy/monitored-9100"
+  # data_dir: "/tidb-data/monitored-9100"
+  # log_dir: "/tidb-deploy/monitored-9100/log"
+
+# # Server configs are used to specify the runtime configuration of TiDB components.
+# # All configuration items can be found in TiDB docs:
+# # - TiDB: https://docs.pingcap.com/zh/tidb/stable/tidb-configuration-file
+# # - TiKV: https://docs.pingcap.com/zh/tidb/stable/tikv-configuration-file
+# # - PD: https://docs.pingcap.com/zh/tidb/stable/pd-configuration-file
+# # All configuration items use points to represent the hierarchy, e.g:
+# #   readpool.storage.use-unified-pool
+# #
+# # You can overwrite this configuration via the instance-level `config` field.
+
+server_configs:
+  tidb:
+    log.slow-threshold: 300
+  tikv:
+    # server.grpc-concurrency: 4
+    # raftstore.apply-pool-size: 2
+    # raftstore.store-pool-size: 2
+    # rocksdb.max-sub-compactions: 1
+    # storage.block-cache.capacity: "16GB"
+    # readpool.unified.max-thread-count: 12
+    readpool.storage.use-unified-pool: false
+    readpool.coprocessor.use-unified-pool: true
+  pd:
+    schedule.leader-schedule-limit: 4
+    schedule.region-schedule-limit: 2048
+    schedule.replica-schedule-limit: 64
+    replication.enable-placement-rules: true
+  tiflash:
+    # Maximum memory usage for processing a single query. Zero means unlimited.
+    profiles.default.max_memory_usage: 0
+    # Maximum memory usage for processing all concurrently running queries on the server. Zero means unlimited.
+    profiles.default.max_memory_usage_for_all_queries: 0
+  tiflash-learner:
+    # The allowable number of threads in the pool that flushes Raft data to storage.
+    raftstore.apply-pool-size: 4
+    # The allowable number of threads that process Raft, which is the size of the Raftstore thread pool.
+    raftstore.store-pool-size: 4
+pd_servers:
+  - host: 192.168.199.250
+    # ssh_port: 22
+    # name: "pd-1"
+    # client_port: 2379
+    # peer_port: 2380
+    # deploy_dir: "/tidb-deploy/pd-2379"
+    # data_dir: "/tidb-data/pd-2379"
+    # log_dir: "/tidb-deploy/pd-2379/log"
+    # numa_node: "0,1"
+    # # The following configs are used to overwrite the `server_configs.pd` values.
+    # config:
+    #   schedule.max-merge-region-size: 20
+    #   schedule.max-merge-region-keys: 200000
+  # - host: 10.0.1.5
+  # - host: 10.0.1.6
+tidb_servers:
+  - host: 192.168.199.250
+    # ssh_port: 22
+    # port: 4000
+    # status_port: 10080
+    # deploy_dir: "/tidb-deploy/tidb-4000"
+    # log_dir: "/tidb-deploy/tidb-4000/log"
+    # numa_node: "0,1"
+    # # The following configs are used to overwrite the `server_configs.tidb` values.
+    # config:
+    #   log.slow-query-file: tidb-slow-overwrited.log
+  # - host: 10.0.1.8
+  # - host: 10.0.1.9
+tikv_servers:
+  - host: 192.168.199.250
+    # ssh_port: 22
+    # port: 20160
+    # status_port: 20180
+    # deploy_dir: "/tidb-deploy/tikv-20160"
+    # data_dir: "/tidb-data/tikv-20160"
+    # log_dir: "/tidb-deploy/tikv-20160/log"
+    # numa_node: "0,1"
+    # # The following configs are used to overwrite the `server_configs.tikv` values.
+    # config:
+    #   server.grpc-concurrency: 4
+    #   server.labels:
+    #     zone: "zone1"
+    #     dc: "dc1"
+    #     host: "host1"
+  # - host: 10.0.1.2
+  # - host: 10.0.1.3
+
+tiflash_servers:
+  - host: 192.168.199.250
+    # ssh_port: 22
+    # tcp_port: 9000
+    # flash_service_port: 3930
+    # flash_proxy_port: 20170
+    # flash_proxy_status_port: 20292
+    # metrics_port: 8234
+    # deploy_dir: "/tidb-deploy/tiflash-9000"
+    ## The `data_dir` will be overwritten if you define `storage.main.dir` configurations in the `config` section.
+    # data_dir: "/tidb-data/tiflash-9000"
+    # log_dir: "/tidb-deploy/tiflash-9000/log"
+    # numa_node: "0,1"
+    # # The following configs are used to overwrite the `server_configs.tiflash` values.
+    # config:
+    #   logger.level: "info"
+    #   ## Multi-disk deployment introduced in v4.0.9
+    #   ## Check https://docs.pingcap.com/tidb/stable/tiflash-configuration#multi-disk-deployment for more details.
+    #   ## Example1:
+    #   # storage.main.dir: [ "/nvme_ssd0_512/tiflash", "/nvme_ssd1_512/tiflash" ]
+    #   # storage.main.capacity: [ 536870912000, 536870912000 ]
+    #   ## Example2:
+    #   # storage.main.dir: [ "/sata_ssd0_512/tiflash", "/sata_ssd1_512/tiflash", "/sata_ssd2_512/tiflash" ]
+    #   # storage.latest.dir: [ "/nvme_ssd0_150/tiflash" ]
+    #   # storage.main.capacity: [ 536870912000, 536870912000, 536870912000 ]
+    #   # storage.latest.capacity: [ 161061273600 ]
+    # learner_config:
+    #   log-level: "info"
+    #   server.labels:
+    #     zone: "zone2"
+    #     dc: "dc2"
+    #     host: "host2"
+  # - host: 10.0.1.12
+  # - host: 10.0.1.13
+
+monitoring_servers:
+  - host: 192.168.199.250
+    # ssh_port: 22
+    # port: 9090
+    # deploy_dir: "/tidb-deploy/prometheus-8249"
+    # data_dir: "/tidb-data/prometheus-8249"
+    # log_dir: "/tidb-deploy/prometheus-8249/log"
+
+grafana_servers:
+  - host: 192.168.199.250
+    # port: 3000
+    # deploy_dir: /tidb-deploy/grafana-3000
+
+alertmanager_servers:
+  - host: 192.168.199.250
+    # ssh_port: 22
+    # web_port: 9093
+    # cluster_port: 9094
+    # deploy_dir: "/tidb-deploy/alertmanager-9093"
+    # data_dir: "/tidb-data/alertmanager-9093"
+    # log_dir: "/tidb-deploy/alertmanager-9093/log"
+```
+
 4. 檢查集群存在的潛在風險
 
 ```bash
 tiup cluster check ./topology.yaml --user root [-p] [-i /home/root/.ssh/gcp_rsa]
 ```
+
 5. 自動修復集群存在的潛在風險
 
 ```bash
 tiup cluster check ./topology.yaml --apply --user root [-p] [-i /home/root/.ssh/gcp_rsa]
 ```
+
 6. 部署 TiDB 集群
 
 ```bash
-tiup cluster deploy tidb-test v7.0.0 ./topology.yaml --user root [-p] [-i /home/root/.ssh/gcp_rsa]
+tiup cluster deploy tidb-test v8.5.1 ./topology.yaml --user root [-p] [-i /home/root/.ssh/gcp_rsa]
+```
+
+```bash
+# 單機測試的話 就是設定檔都是同一個IP
+tiup cluster deploy tidb-test v8.5.1 ./topology.yaml --user root -i /home/root/.ssh/
+#-i 選密鑰路徑
+#-p 輸入密碼
+#如果root密碼統一，建議用-p 這樣來的簡單一些，不用做免密
 ```
 
 7. 查看TiUP管理的集群
@@ -121,9 +312,19 @@ tiup cluster list
 tiup cluster display tidb-test
 ```
 
-mysql --host <tidb_server_host> --port 4000 -u root -p --comments
+9. 要開的port
 
-TiDB dashboard http://192.168.?.?:2379/dashboard/
+Generate config pd -> 192.168.199.250:2379 ... Done
+Generate config tikv -> 192.168.199.250:20160 ... Done
+Generate config tidb -> 192.168.199.250:4000 ... Done
+Generate config tiflash -> 192.168.199.250:9000 ... Done
+Generate config prometheus -> 192.168.199.250:9090 ... Done
+Generate config grafana -> 192.168.199.250:3000 ... Done
+Generate config alertmanager -> 192.168.199.250:9093 ... Done
+
+10. 登入TiDB mysql --host <tidb_server_host> --port 4000 -u root -p --comments
+
+11. 管理界面 TiDB dashboard http://192.168.?.?:2379/dashboard/
 
 TiDB Lightning原理 高速導入資料到TiDB
 
@@ -223,9 +424,6 @@ purge:
 
 跳過錯誤 tiup dmctl --master-addr 192.168.199.236:8261 handle-error test234 skip
 
-
-
-
 TiDB Binlog 收集TiDB的binlog,提供備份跟同步 5.0之後建議使用TiCDC 這個不要用
 
 資料同步：同步TiDB集群資料到到其他資料庫
@@ -244,10 +442,11 @@ TiDB binlog是從TiDB Server的日誌來實現同步, TiCDC是直接抽取TiKV�
 TiCDC只能同步至少存在一個有效索引的表
 
 1. 主鍵(Primary Key)為有效索引
-2. 同時滿足下列條件的唯一索引(UNIQUE INDEX)為有效索引
- - 索引中每一列的結構中明確定義非空(NOT NULL)
- - 索引中不存在虛擬生成列(VIRTUAL GENERATED COLUMNS)
 
+2. 同時滿足下列條件的唯一索引(UNIQUE INDEX)為有效索引
+
+- 索引中每一列的結構中明確定義非空(NOT NULL)
+- 索引中不存在虛擬生成列(VIRTUAL GENERATED COLUMNS)
 
 TiFlash 是 列式儲存
 TiKV    是 行式儲存
