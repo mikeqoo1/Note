@@ -57,7 +57,7 @@ sudo docker run -d --name gitlab-runner-docker --restart always -v /opt/gitlab-r
 
 4. 把憑證丟進去 sudo docker cp FG4H1FT922900264.crt cicdmono:/usr/local/share/ca-certificates/
 
-5. update-ca-certificates
+5. update-"/var/run/docker.sock:/var/run/docker.sock"ca-certificates
 
 6. sudo docker exec -it cicdmono /bin/bash
 
@@ -118,3 +118,30 @@ GitLab Runner 要改成用 ssh 的方式 Like this
     port = "22"
     identity_file = "/主機帳號/.ssh/id_rsa"
 ```
+# GitLab CI Docker in Docker
+
+萬一遇到 Error during connect: Post http://docker:2375/v1.40/auth: dial tcp: lookup docker on x.x.x.x:53: no such host 的問題
+
+需要在 gitlab runner 的設定檔加上"/var/run/docker.sock:/var/run/docker.sock"
+
+```bash
+[[runners]]
+  name = "max"
+  url = "https://max.lv"
+  id = 3
+  token = "glrt-Pnz4_jx3_reTXZ1B"
+  token_obtained_at = 2024-04-02T11:11:56Z
+  token_expires_at = 0001-01-01T00:00:00Z
+  executor = "docker"
+  [runners.docker]
+    tls_verify = false
+    image = "docker:24.0.5"
+    privileged = true
+    disable_entrypoint_overwrite = false
+    oom_kill_disable = false
+    disable_cache = false
+    volumes = ["/var/run/docker.sock:/var/run/docker.sock", "/cache"]   <---- 這邊
+    shm_size = 0
+    network_mtu = 0
+```
+
