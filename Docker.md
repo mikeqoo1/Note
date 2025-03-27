@@ -51,3 +51,16 @@ sudo find /var/lib/docker/containers/ -name "*-json.log" -type f -delete 1
 docker日誌linux中由服務產生的日誌（重要）這個指令將直接列出linux中大於100M的檔案。
 find / -size +100M -type f 1
 ```
+
+# 打包自己建立的docker容器
+
+先把容器轉換為 Image 並且取名是我的 docker hub 專案名稱
+
+1. sudo docker commit 5f373bc1348c 106061/almalinux9andnvm:latest
+
+確認 images
+
+2. sudo docker images
+
+3. sudo docker push 106061/almalinux9andnvm:latest
+

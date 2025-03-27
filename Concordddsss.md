@@ -22,7 +22,7 @@ snap 處理方法
 openssl x509 -inform der -in ??????.cer -out xxxx.pem
 sudo snap set system store-certs.cert1="$(cat /path/xxxx.pem)"
 
-For Rocky/CentOS
+For Rocky/CentOS/Almalinux
 sudo cp ??????.cer /etc/pki/ca-trust/source/anchors/
 sudo update-ca-trust
 
