@@ -702,3 +702,34 @@ GRANT SELECT ON *.* TO 'misuser'@'%' ;
 CREATE USER ''@'%' IDENTIFIED VIA pam USING 'mysqld';
 GRANT PROXY ON 'misuser'@'%' TO ''@'%';
 ```
+
+## 安裝設定 Renovate (自動更新套件)
+
+用 gitlab ci/cd 來處理 我先把範例的貼上
+
+以下雷點需要處理 因為我們有奇怪的防火牆 所以需要把憑證先丟到 renovate 在重新編譯用那包來處理
+
+renovate.dockerfile 就是腳本 因為我們的 gitlab 是 https 也需要把那張憑證丟進去
+
+打包推送 3 步驟:
+
+sudo docker build -f renovate.dockerfile -t  -t my-renovate .
+
+sudo docker tag my-renovate 106061/my-renovate
+
+sudo docker tag my-renovate 106061/my-renovate
+
+```yaml
+-----上面的先省略-------
+renovate:
+  stage: deps-update
+  image: 106061/my-renovate
+  before_script: [] # 清除全局 nvm before_script
+  variables:
+    NODE_TLS_REJECT_UNAUTHORIZED: "0"
+    LOG_LEVEL: debug
+    RENOVATE_TOKEN: gitlab使用者或是機器人的token
+    RENOVATE_CONFIG_FILE: $CI_PROJECT_DIR/renovate.json
+  script:
+    - NODE_TLS_REJECT_UNAUTHORIZED=0 renovate
+```
