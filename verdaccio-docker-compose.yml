@@ -1,0 +1,38 @@
+version: '3'
+
+services:
+  verdaccio:
+    image: verdaccio/verdaccio:latest
+    container_name: verdaccio
+    ports:
+      - "4873:4873"
+    volumes:
+      - /opt/verdaccio/storage:/verdaccio/storage
+      - /opt/verdaccio/conf:/verdaccio/conf
+      - /opt/verdaccio/plugins:/verdaccio/plugins
+    restart: always
+
+
+# 啟動
+#sudo docker compose -f verdaccio-docker-compose.yml up -d
+# 關閉
+#sudo docker compose -f verdaccio-docker-compose.yml down
+
+# 還需要加上設定檔在/opt/verdaccio/conf裡config.yaml
+# config.yaml
+# ```yaml
+# storage: /verdaccio/storage
+# auth:
+#   htpasswd:
+#     file: ./htpasswd
+#     max_users: 100
+# uplinks:
+#   npmjs:
+#     url: https://registry.npmjs.org/\
+# packages:
+#   '**':
+#     access: $all
+#     publish: $authenticated
+#     proxy: npmjs
+# listen: 0.0.0.0:4873
+# ```
