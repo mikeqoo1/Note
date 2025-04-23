@@ -1,0 +1,40 @@
+version: "3.8"
+
+services:
+  haproxy:
+    image: haproxy:latest
+    container_name: haproxy
+    ports:
+      - "8456:8456"
+    volumes:
+      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    networks:
+      - internal_net
+    restart: always
+
+  whoami:
+    image: traefik/whoami
+    container_name: whoami
+    networks:
+      - internal_net
+    restart: always
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    volumes:
+      - ./nginx-html:/usr/share/nginx/html:ro
+    networks:
+      - internal_net
+    restart: always
+
+  httpbin:
+    image: kennethreitz/httpbin
+    container_name: httpbin
+    networks:
+      - internal_net
+    restart: always
+
+networks:
+  internal_net:
+    driver: bridge
