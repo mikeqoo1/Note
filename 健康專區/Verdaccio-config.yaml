@@ -8,6 +8,9 @@ auth:
 uplinks:
   npmjs:
     url: https://registry.npmjs.org/
+    strict_ssl: false
+    cache: false
+    ignore_upstream_failure: true
 
 packages:
   "@*/*":
