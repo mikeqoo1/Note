@@ -126,6 +126,9 @@ sonar.scm.disabled=true
 sudo sonar-scanner -Dsonar.login=sqp_519ee049214c43848b05d45d9d4285d6acd6b3fa
 ```
 
+
+### 阿康還沒用這個 現在都是單機測試模式 用最上面的啟動指令
+
 ```SonarQube.yml
 version: "3"
 
@@ -161,3 +164,21 @@ volumes:
   postgresql:
   postgresql_data:
 ```
+
+所以遇到不能登入
+
+- 忘記 admin 密碼
+
+- 無法登入 UI
+
+- Docker Volumes 鎖住了 .lock 檔
+
+- Database may be already in use 再度發生
+
+強制解除 H2 lock
+
+```bash
+docker exec -it sonarqube bash
+rm -f /opt/sonarqube/data/*.lock
+```
+
