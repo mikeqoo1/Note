@@ -44,3 +44,14 @@ podman compose -f verdaccio-docker-compose.yml up -d
 
 podman compose -f verdaccio-docker-compose.yml down
 
+### 上傳 package
+
+```bash
+npm publish --registry http://192.168.199.235:4873/
+```
+
+### 刪除 package
+
+```bash
+npm unpublish @110084/cgva-addon --force --registry http://192.168.199.235:4873
+```
