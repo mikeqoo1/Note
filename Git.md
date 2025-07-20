@@ -123,3 +123,29 @@ git remote add 遠端名稱 新的遠端倉庫URL
 ```git
 git remote set-url --add origin 新的遠端倉庫URL
 ```
+
+## Git設定worktree
+
+```bash
+# 從 main 建一個空分支出來（不共享歷史）
+git switch --orphan b-lib
+git rm -rf .  # 刪除所有追蹤檔案
+
+# 建立 lib 專案內容（或放進現成內容）
+mkdir lib_src
+echo "module.exports = function() { console.log('lib B'); }" > lib_src/index.js
+
+git add .
+git commit -m "init B lib branch"
+
+# 回到 main
+git switch main
+
+# 新增一個實體目錄 lib/B-project，綁定 b-lib 分支
+git worktree add lib/B-project b-lib
+
+A-project/
+├── main 專案原始碼
+├── lib/
+│   └── B-project/  ← 實體資料夾來自 b-lib 分支
+```

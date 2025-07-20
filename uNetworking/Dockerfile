@@ -9,7 +9,7 @@ RUN dnf install -y epel-release && \
     dnf install -y curl --allowerasing
 
 # Node.js + npm (for later testing uws.js)
-RUN curl -sL https://rpm.nodesource.com/setup_24.x | bash - && \
+RUN curl -sL https://rpm.nodesource.com/setup_22.x | bash - && \
     dnf install -y nodejs
 
 RUN export NODE_EXTRA_CA_CERTS=/etc/pki/ca-trust/source/anchors/FG4H1FT922900257.crt
