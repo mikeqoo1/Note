@@ -1,0 +1,37 @@
+services:
+  postgres:
+    image: docker.io/library/postgres:${POSTGRES_TAG}
+    container_name: postgres18
+    restart: always
+    ports:
+      - "${PG_PORT}:5432"
+    environment:
+      POSTGRES_USER: "${POSTGRES_USER}"
+      POSTGRES_PASSWORD_FILE: /run/secrets/pg_password
+      POSTGRES_DB: "${POSTGRES_DB}"
+      TZ: "${TZ}"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+    volumes:
+      - pgdata18:/var/lib/postgresql/data
+      - pglog18:/var/log/postgresql
+      - ./config/postgresql.conf:/etc/postgresql/postgresql.conf:Z
+      - ./config/pg_hba.conf:/etc/postgresql/pg_hba.conf:Z
+      - ./initdb:/docker-entrypoint-initdb.d:Z
+      # ⬇⬇ 改用 bind mount + :Z，取消 secrets:
+      - ./secrets/pg_password.txt:/run/secrets/pg_password:ro,Z
+    # 刪掉這兩塊（service 下的 secrets 與最底下的 secrets 區塊）
+    # secrets:
+    #   - pg_password
+
+# 刪掉 top-level secrets 區塊
+# secrets:
+#   pg_password:
+#     file: ./secrets/pg_password.txt
+
+volumes:
+  pgdata18:
+  pglog18:
