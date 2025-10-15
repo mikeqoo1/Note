@@ -1,0 +1,29 @@
+FROM rockylinux:9
+
+COPY FG4H1FT922900257.crt /etc/pki/ca-trust/source/anchors/
+RUN update-ca-trust
+
+ENV LANG=en_US.UTF-8
+
+RUN dnf -y install 'dnf-command(config-manager)' && dnf config-manager --set-enabled crb || true
+RUN dnf -y install epel-release && \
+    dnf -y install \
+      gnome-flashback gnome-panel metacity \
+      gnome-session gnome-session-xsession gnome-terminal \
+      adwaita-gtk2-theme adwaita-icon-theme \
+      dbus-x11 dbus-daemon xorg-x11-xauth xorg-x11-fonts* \
+      dconf glib-networking gvfs xdg-user-dirs \
+      mesa-dri-drivers mesa-libGL mesa-libEGL \
+      glibc-langpack-en which nano less tar && \
+    dnf clean all
+
+# 可選 wrapper（實際上會被 run-time entrypoint 覆蓋）
+RUN printf '%s\n' '#!/bin/sh' \
+  'set -e' \
+  'export XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR:-/tmp/xdg-$(id -u)}' \
+  'mkdir -p "$XDG_RUNTIME_DIR" && chmod 700 "$XDG_RUNTIME_DIR"' \
+  'xdg-user-dirs-update || true' \
+  'exec dbus-launch --exit-with-session gnome-session --session=gnome-flashback-metacity' \
+  > /usr/local/bin/start-flashback.sh && chmod +x /usr/local/bin/start-flashback.sh
+
+CMD ["sh","-lc","exec /usr/local/bin/start-flashback.sh"]
