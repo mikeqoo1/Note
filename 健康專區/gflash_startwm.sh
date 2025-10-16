@@ -1,6 +1,6 @@
 #!/bin/bash
 # --- xRDP -> Per-User Podman GNOME Flashback (with logging) ---
-exec >/tmp/xrdp-startwm.log 2>&1
+exec >/tmp/xrdp-startwm-poddesk.log 2>&1
 set -x
 
 echo "=== $(date) user=$(whoami) ==="
