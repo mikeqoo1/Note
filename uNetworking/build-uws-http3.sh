@@ -4,7 +4,7 @@ set -e
 
 # 🔧 建立 Dockerfile
 cat <<'EOF' > Dockerfile
-FROM almalinux:9.5
+FROM almalinux:10
 
 COPY FG4H1FT922900257.crt /etc/pki/ca-trust/source/anchors/FG4H1FT922900257.crt
 RUN update-ca-trust
@@ -12,20 +12,22 @@ RUN update-ca-trust
 # 基礎套件
 RUN dnf install -y epel-release && \
     dnf install -y gcc gcc-c++ make git cmake zlib-devel libevent-devel wget perl clang && \
-    dnf install -y curl --allowerasing
+    dnf install -y curl --allowerasing && \
+    dnf install -y libuv libuv-devel && \
+    dnf install -y libstdc++ libstdc++-devel libstdc++-static && \
+    dnf install -y libgcc libstdc++-static
+
+RUN ln -s /usr/bin/clang    /usr/bin/clang-18    || true
+RUN ln -s /usr/bin/clang++  /usr/bin/clang++-18  || true
 
 # Node.js + npm (for later testing uws.js)
-RUN curl -sL https://rpm.nodesource.com/setup_22.x | bash - && \
+RUN curl -sL https://rpm.nodesource.com/setup_24.x | bash - && \
     dnf install -y nodejs
 
 RUN export NODE_EXTRA_CA_CERTS=/etc/pki/ca-trust/source/anchors/FG4H1FT922900257.crt
 
-COPY libuv-devel-1.42.0-2.el9_4.x86_64.rpm /opt
-
 # 編譯目錄
 WORKDIR /opt
-
-RUN dnf -y install libuv-devel-1.42.0-2.el9_4.x86_64.rpm
 
 # Clone uWebSockets.js (含子模組)
 RUN git clone --recursive https://github.com/uNetworking/uWebSockets.js.git

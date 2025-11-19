@@ -1,0 +1,7 @@
+{
+  "name": "@uws",
+  "version": "http3-custom-1.0.0",
+  "main": "dist/uws.js",
+  "os": ["linux"],
+  "cpu": ["x64"]
+}

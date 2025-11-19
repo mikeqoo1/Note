@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@mike/uws-http3": "file:./uws"
+  }
+}
