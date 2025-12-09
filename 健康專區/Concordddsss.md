@@ -30,6 +30,12 @@ For Docke 容器裡
 cp ??????.cer ?????.crt /usr/local/share/ca-certificates/
 cp ??????.cer ?????.crt /etc/ssl/certs/
 update-ca-certificates
+
+For Node 使用
+在 .bashrc 加入 export NODE_EXTRA_CA_CERTS='阿康憑證路徑'
+
+For Python 使用
+在 .bashrc 加入 export REQUESTS_CA_BUNDLE='阿康憑證路徑'
 ```
 
 ## 系統裝機手冊 2.0
