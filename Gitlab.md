@@ -145,3 +145,30 @@ GitLab Runner 要改成用 ssh 的方式 Like this
     network_mtu = 0
 ```
 
+# GitLab-Runner 的升級
+
+```bash
+1. 先拉最新的 images
+
+sudo docker pull gitlab/gitlab-runner:latest
+
+2.停掉舊容器
+
+sudo docker stop gitlab-runner-docker
+
+3. 刪掉舊容器（不會刪你的 config，因為 config 在 host volume）
+
+sudo docker rm gitlab-runner-docker
+
+4. 用同樣的方式重建
+
+sudo docker run -d --name gitlab-runner-docker --restart always\
+-v /opt/gitlab-runner/config:/etc/gitlab-runner\
+-v /var/run/docker.sock:/var/run/docker.sock\
+gitlab/gitlab-runner:latest
+
+5. 匯入 235 的 https 自簽憑證
+
+6. 匯入阿康防火牆CA
+
+```
