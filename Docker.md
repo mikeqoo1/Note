@@ -64,3 +64,20 @@ find / -size +100M -type f 1
 
 3. sudo docker push 106061/almalinux9andnvm:latest
 
+# Docker Volumes 轉移
+
+最佳方案：改 Docker 的 data-root 到 /data 在沒有任何容器的時候使用 這樣不會影響其他設定 裝新機器的時候最適合
+
+```txt
+這會把 /var/lib/docker 整個搬走（包含 image、overlay2、build cache、volumes），通常最能省 /root/系統碟。
+```
+
+步驟很簡單
+
+1. Stops docker
+2. Rsync /var/lib/docker -> /data/docker
+3. Configure /etc/docker/daemon.json with "data-root"
+4. Start docker and verify
+
+腳本在 move_docker_volumes_to_data.sh
+
