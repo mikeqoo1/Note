@@ -17,7 +17,7 @@
  └─ 收 metrics + UI
 ```
 
-## 234 (A主機的問題)
+## A主機的問題 (234)
 
 1) 安裝 pmm-agent
 
@@ -48,7 +48,7 @@ sudo systemctl restart pmm-agent
 3) 因為改 Port 所以 pmm-admin 指令需要修改增加 --pmm-agent-listen-port
 
 ```bash
-sudo pmm-admin add mysql   --server-url=https://admin:Aa123456@192.168.199.234:18443   --server-insecure-tls   --pmm-agent-listen-port=17777   --username=crcft   --password='Aa1234'   --host=192.168.199.234   --port=3306   --service-name=mariadb-234   --query-source=slowlog
+sudo pmm-admin add mysql   --server-url=https://admin:Aa123456@192.168.199.234:18443   --server-insecure-tls   --pmm-agent-listen-port=17777   --username=資料庫帳號   --password='資料庫密碼'   --host=192.168.199.234   --port=3306   --service-name=mariadb-234   --query-source=slowlog
 ```
 
 4) 同一台主機 不同容器的加入方式
@@ -128,3 +128,75 @@ sudo pmm-admin list \
 
 ![alt text](驗證.png)
 
+## B主機的問題 (134)
+
+用容器安裝 pmm-client:3 並且註冊好遠端的 pmm-server (腳本:pmm-client.sh)
+
+進入容器設相關資料庫服務
+
+本地資料庫的加入方式如下
+
+![alt text](本地資料庫.png)
+
+```bash
+sudo docker exec -it pmm-client bash -lc \
+"pmm-admin add mysql \
+  --username=資料庫帳號 \
+  --password='資料庫密碼' \
+  --host=127.0.0.1 \
+  --port=3306 \
+  --service-name='EMTS-QA-01-mariadb' \
+  --query-source=perfschema"
+```
+
+容器資料庫的加入方式
+
+簡單弄個PG資料庫
+
+```yaml
+services:
+  postgres18:
+    image: postgres:18
+    container_name: postgres18
+    restart: always
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_DB: mydb
+      POSTGRES_PASSWORD: mypassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg18_data:/var/lib/postgresql
+    command:
+        # 開 pg_stat_statements
+      - "postgres"
+      - "-c"
+      - "shared_preload_libraries=pg_stat_statements"
+      - "-c"
+      - "pg_stat_statements.track=all"
+      - "-c"
+      - "track_activity_query_size=2048"
+
+volumes:
+  pg18_data:
+```
+
+```bash
+# 建立 extension（每個 DB 要建一次）
+sudo docker exec -it postgres18 psql -U myuser -d mydb -c \
+"CREATE EXTENSION IF NOT EXISTS pg_stat_statements;"
+
+# 把 PG18 加進 PMM
+sudo docker exec -it pmm-client pmm-admin add postgresql \
+  --service-name=EMTS-QA-01-postgres18-qan \
+  --host=127.0.0.1 \
+  --port=5432 \
+  --username=資料庫帳號 \
+  --password='資料庫密碼' \
+  --database=mydb \
+  --query-source=pgstatements
+```
+
+![alt text](B主機.png)
+
+## MSSQL 的設定
