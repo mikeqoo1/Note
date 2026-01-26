@@ -200,3 +200,110 @@ sudo docker exec -it pmm-client pmm-admin add postgresql \
 ![alt text](B主機.png)
 
 ## MSSQL 的設定
+
+sudo docker network create pmm-net 2>/dev/null || true
+
+1) 先建立 MSSQL Server 容器
+
+```bash
+sudo docker run -d \
+  --name mssql \
+  --restart unless-stopped \
+  --network pmm-net \
+  -e 'ACCEPT_EULA=Y' \
+  -e 'MSSQL_SA_PASSWORD=YourStr0ng!Passw0rd' \
+  -e "MSSQL_PID=Express" \
+  -p 2433:1433 \
+  mcr.microsoft.com/mssql/server:2022-latest
+```
+
+2) 建立 PMM 專用帳號
+
+```bash
+sudo docker exec -i mssql bash -lc 'set +H
+/opt/mssql-tools18/bin/sqlcmd \
+  -S localhost -U sa -P "YourStr0ng!Passw0rd" \
+  -C \
+  -Q "
+USE master;
+IF EXISTS (SELECT 1 FROM sys.server_principals WHERE name = '\''pmm'\'')
+BEGIN
+  DROP LOGIN pmm;
+END;
+
+CREATE LOGIN pmm WITH PASSWORD = '\''X9!aZ7#Qp2@Mssql'\'', CHECK_POLICY = ON, CHECK_EXPIRATION = OFF;
+CREATE USER pmm FOR LOGIN pmm;
+ALTER SERVER ROLE sysadmin ADD MEMBER pmm;
+"
+'
+```
+
+3) 啟動 MSSQL Exporter（Prometheus）
+
+建立 env 檔
+
+```bash
+sudo mkdir -p /data/mssql-exporter
+
+sudo tee /data/mssql-exporter/env >/dev/null <<'EOF'
+SERVER=mssql
+PORT=1433
+USERNAME=pmm
+PASSWORD=X9!aZ7#Qp2@Mssql
+ENCRYPT=true
+TRUST_SERVER_CERTIFICATE=true
+EXPOSE=4000
+EOF
+
+sudo chmod 600 /data/mssql-exporter/env
+```
+
+啟動 awaragi/mssql-exporter container
+
+```bash
+sudo docker rm -f mssql-exporter 2>/dev/null || true
+sudo docker pull awaragi/prometheus-mssql-exporter:latest
+
+sudo docker run -d \
+  --name mssql-exporter \
+  --restart unless-stopped \
+  --network pmm-net \
+  --env-file /data/mssql-exporter/env \
+  -p 4000:4000 \
+  awaragi/prometheus-mssql-exporter:latest
+```
+
+4) 加進 PMM（External exporter）
+
+```bash
+sudo docker exec -it pmm-client pmm-admin remove external "EMTS-QA-01-mssql" 2>/dev/null || true
+
+NODE_ID=$(sudo docker exec -it pmm-client pmm-admin status \
+  | awk -F': ' '/Node ID/ {print $2}' | tr -d '\r')
+
+echo "Node ID = $NODE_ID"
+
+
+sudo docker exec -it pmm-client pmm-admin add external \
+  --service-name="EMTS-QA-01-mssql" \
+  --service-node-id="$NODE_ID" \
+  --scheme="http" \
+  --metrics-path="/metrics" \
+  --listen-port=4000 \
+  --environment="qa" \
+  --custom-labels="dbtype=mssql,env=qa,node=EMTS-QA-01" \
+  --metrics-mode="pull"
+
+```
+
+5) 導入到UI上
+
+因為UI並沒有支援 MSSQL 但是 我們的 exporter 有正常執行 所以他會知道
+
+接下來把 mssql.json Import 進去就好了
+
+![alt text](Import_msqql.png)
+
+6) 完成
+
+![alt text](mssql畫面示意圖.png)

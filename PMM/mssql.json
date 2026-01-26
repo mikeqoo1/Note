@@ -1,0 +1,131 @@
+{
+  "uid": "mssql-simple-multidb",
+  "title": "MSSQL - Simple Multi-DB (env/node)",
+  "tags": ["mssql", "simple", "multidb"],
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "30s",
+  "time": { "from": "now-1h", "to": "now" },
+  "templating": {
+    "list": [
+      {
+        "type": "datasource",
+        "name": "DS_METRICS",
+        "label": "Datasource",
+        "query": "prometheus",
+        "current": { "text": "Metrics", "value": "Metrics" }
+      },
+      {
+        "type": "query",
+        "name": "env",
+        "label": "env",
+        "datasource": { "type": "prometheus", "uid": "${DS_METRICS}" },
+        "refresh": 1,
+        "query": { "query": "label_values(mssql_up, env)" }
+      },
+      {
+        "type": "query",
+        "name": "node",
+        "label": "node",
+        "datasource": { "type": "prometheus", "uid": "${DS_METRICS}" },
+        "refresh": 1,
+        "query": { "query": "label_values(mssql_up{env=\"$env\"}, node)" }
+      },
+      {
+        "type": "query",
+        "name": "db",
+        "label": "database",
+        "datasource": { "type": "prometheus", "uid": "${DS_METRICS}" },
+        "refresh": 1,
+        "includeAll": true,
+        "allValue": ".*",
+        "query": {
+          "query": "label_values(mssql_database_state{env=\"$env\",node=\"$node\"}, database)"
+        }
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "MSSQL Up",
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "${DS_METRICS}" },
+      "targets": [
+        { "expr": "max(mssql_up{env=\"$env\",node=\"$node\"})", "refId": "A" }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "Active Connections",
+      "gridPos": { "h": 8, "w": 18, "x": 6, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "${DS_METRICS}" },
+      "targets": [
+        {
+          "expr": "mssql_connections{env=\"$env\",node=\"$node\"}",
+          "legendFormat": "connections",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "Batch Requests / sec",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 6 },
+      "datasource": { "type": "prometheus", "uid": "${DS_METRICS}" },
+      "targets": [
+        {
+          "expr": "rate(mssql_batch_requests{env=\"$env\",node=\"$node\"}[5m])",
+          "legendFormat": "batch/s",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "timeseries",
+      "title": "Deadlocks / sec (instance)",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 6 },
+      "datasource": { "type": "prometheus", "uid": "${DS_METRICS}" },
+      "targets": [
+        {
+          "expr": "rate(mssql_deadlocks{env=\"$env\",node=\"$node\"}[5m])",
+          "legendFormat": "deadlocks/s",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Database State",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 14 },
+      "datasource": { "type": "prometheus", "uid": "${DS_METRICS}" },
+      "targets": [
+        {
+          "expr": "mssql_database_state{env=\"$env\",node=\"$node\",database=~\"$db\"}",
+          "legendFormat": "{{database}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Database File Size",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 22 },
+      "datasource": { "type": "prometheus", "uid": "${DS_METRICS}" },
+      "targets": [
+        {
+          "expr": "mssql_database_filesize{env=\"$env\",node=\"$node\",database=~\"$db\"}",
+          "legendFormat": "{{database}}",
+          "refId": "A"
+        }
+      ]
+    }
+  ]
+}
