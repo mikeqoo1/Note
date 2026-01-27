@@ -486,11 +486,7 @@ sudo systemctl status sssd-kcm.service
 
 ``` bash
 sudo vi /etc/pam.d/sshd
-```
-
-12. pam_selinux.so close should be the first session rule
-
-```bash
+pam_selinux.so close should be the first session rule
 session    required     pam_mkhomedir.so skel=/etc/skel/ umask=0077
 ```
 
