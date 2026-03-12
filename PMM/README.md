@@ -307,3 +307,180 @@ sudo docker exec -it pmm-client pmm-admin add external \
 6) 完成
 
 ![alt text](mssql畫面示意圖.png)
+
+## Audit 強化設定（含 MSSQL）
+
+PMM 本身重點是 metrics 與 QAN，不是完整 Audit Log 儲存。  
+建議分成兩條線同時做：
+
+1) DB 原生 Audit（MariaDB / PostgreSQL / MSSQL）  
+2) PMM 看效能異常，Audit Log 用檔案留存（或再送到 Loki / SIEM）
+
+---
+
+### 1) MariaDB Audit（server_audit）
+
+先安裝 plugin（只要一次）：
+
+```sql
+INSTALL SONAME 'server_audit';
+```
+
+即時啟用：
+
+```sql
+SET GLOBAL server_audit_logging=ON;
+SET GLOBAL server_audit_events='CONNECT,QUERY_DDL,QUERY_DML,QUERY_DCL,TABLE';
+SET GLOBAL server_audit_output_type='file';
+SET GLOBAL server_audit_file_path='/var/lib/mysql/server_audit.log';
+SET GLOBAL server_audit_file_rotate_size=1073741824; -- 1GB
+SET GLOBAL server_audit_file_rotations=30;
+```
+
+建議寫進 `my.cnf` 持久化：
+
+```ini
+[mariadb]
+plugin_load_add=server_audit
+server_audit_logging=ON
+server_audit_events=CONNECT,QUERY_DDL,QUERY_DML,QUERY_DCL,TABLE
+server_audit_output_type=file
+server_audit_file_path=/var/lib/mysql/server_audit.log
+server_audit_file_rotate_size=1073741824
+server_audit_file_rotations=30
+```
+
+---
+
+### 2) PostgreSQL Audit（pgaudit）
+
+Docker 啟動參數加入（重點是 `shared_preload_libraries`）：
+
+```yaml
+command:
+  - "postgres"
+  - "-c"
+  - "shared_preload_libraries=pg_stat_statements,pgaudit"
+  - "-c"
+  - "logging_collector=on"
+  - "-c"
+  - "log_destination=stderr"
+  - "-c"
+  - "log_line_prefix=%m [%p] %u@%d %h "
+  - "-c"
+  - "pgaudit.log=read,write,ddl,role"
+  - "-c"
+  - "pgaudit.log_catalog=off"
+```
+
+若 `CREATE EXTENSION pgaudit;` 回報找不到 extension，代表目前 image 沒內建 `pgaudit`，需要改成自建 image 安裝 `postgresql-XX-pgaudit` 套件，或使用已內建 `pgaudit` 的 Postgres image。
+
+啟用 extension：
+
+```bash
+sudo docker exec -it postgres18 psql -U myuser -d mydb -c \
+"CREATE EXTENSION IF NOT EXISTS pgaudit;"
+```
+
+---
+
+### 3) MSSQL Audit（SQL Server Audit）
+
+先把 audit 目錄掛載出來，避免容器重建後遺失：
+
+```bash
+sudo mkdir -p /data/mssql/audit
+sudo chown -R 10001:0 /data/mssql/audit
+sudo chmod 750 /data/mssql/audit
+```
+
+MSSQL container 建議改成：
+
+```bash
+sudo docker rm -f mssql 2>/dev/null || true
+sudo docker run -d \
+  --name mssql \
+  --restart unless-stopped \
+  --network pmm-net \
+  -e 'ACCEPT_EULA=Y' \
+  -e 'MSSQL_SA_PASSWORD=YourStr0ng!Passw0rd' \
+  -e "MSSQL_PID=Express" \
+  -p 2433:1433 \
+  -v /data/mssql/audit:/var/opt/mssql/audit \
+  mcr.microsoft.com/mssql/server:2022-latest
+```
+
+建立 Server Audit + Specification：
+
+```bash
+sudo docker exec -i mssql /opt/mssql-tools18/bin/sqlcmd \
+  -S localhost -U sa -P "YourStr0ng!Passw0rd" -C <<'SQL'
+IF NOT EXISTS (SELECT 1 FROM sys.server_audits WHERE name = 'pmm_audit')
+BEGIN
+  CREATE SERVER AUDIT [pmm_audit]
+  TO FILE (FILEPATH = N'/var/opt/mssql/audit/', MAXSIZE = 1 GB, MAX_ROLLOVER_FILES = 30)
+  WITH (QUEUE_DELAY = 1000, ON_FAILURE = CONTINUE);
+END
+GO
+ALTER SERVER AUDIT [pmm_audit] WITH (STATE = ON);
+GO
+
+IF NOT EXISTS (SELECT 1 FROM sys.server_audit_specifications WHERE name = 'pmm_server_spec')
+BEGIN
+  CREATE SERVER AUDIT SPECIFICATION [pmm_server_spec]
+  FOR SERVER AUDIT [pmm_audit]
+  ADD (FAILED_LOGIN_GROUP),
+  ADD (SUCCESSFUL_LOGIN_GROUP),
+  ADD (SERVER_PERMISSION_CHANGE_GROUP);
+END
+GO
+ALTER SERVER AUDIT SPECIFICATION [pmm_server_spec] WITH (STATE = ON);
+GO
+SQL
+```
+
+針對單一業務 DB（例如 `appdb`）加上 DB 層級稽核：
+
+```bash
+sudo docker exec -i mssql /opt/mssql-tools18/bin/sqlcmd \
+  -S localhost -U sa -P "YourStr0ng!Passw0rd" -C <<'SQL'
+USE [appdb];
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.database_audit_specifications WHERE name = 'pmm_db_spec')
+BEGIN
+  CREATE DATABASE AUDIT SPECIFICATION [pmm_db_spec]
+  FOR SERVER AUDIT [pmm_audit]
+  ADD (DATABASE_OBJECT_ACCESS_GROUP),
+  ADD (SCHEMA_OBJECT_CHANGE_GROUP),
+  ADD (DATABASE_PRINCIPAL_CHANGE_GROUP);
+END
+GO
+ALTER DATABASE AUDIT SPECIFICATION [pmm_db_spec] WITH (STATE = ON);
+GO
+SQL
+```
+
+查最近 Audit 事件：
+
+```bash
+sudo docker exec -i mssql /opt/mssql-tools18/bin/sqlcmd \
+  -S localhost -U sa -P "YourStr0ng!Passw0rd" -C -Q "
+SELECT TOP (100)
+  event_time,
+  action_id,
+  succeeded,
+  server_principal_name,
+  database_name,
+  object_name,
+  statement
+FROM sys.fn_get_audit_file('/var/opt/mssql/audit/*.sqlaudit', DEFAULT, DEFAULT)
+ORDER BY event_time DESC;"
+```
+
+---
+
+### 4) PMM 與 Audit 的搭配方式
+
+1) PMM：看 CPU/IO、慢查詢、鎖等待、QPS、錯誤率  
+2) Audit：看「誰在什麼時間對哪個物件做了什麼」  
+3) 告警建議：先在 PMM 針對 Failed Login、Connections Spike、Query Latency 異常設告警，再回頭對照 Audit Log
