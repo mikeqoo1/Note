@@ -44,8 +44,12 @@ fi
 echo "建立 Loki 資料目錄..."
 sudo mkdir -p ${LOKI_CONFIG_DIR}
 sudo mkdir -p ${LOKI_DATA_DIR}/chunks
+sudo mkdir -p ${LOKI_DATA_DIR}/rules
+sudo mkdir -p ${LOKI_DATA_DIR}/compactor
 sudo mkdir -p ${LOKI_DATA_DIR}/boltdb-shipper-active
 sudo mkdir -p ${LOKI_DATA_DIR}/boltdb-shipper-cache
+# Loki 容器跑在 uid 10001，需要寫入權限
+sudo chown -R 10001:10001 ${LOKI_DATA_DIR}
 
 # ---- 產生 Loki config ----
 echo "產生 Loki 設定檔..."
@@ -126,34 +130,51 @@ fi
 echo ""
 echo "設定 Grafana Loki Datasource..."
 
-PMM_SERVER_IP=$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ${PMM_CONTAINER} | head -c 15)
 LOKI_INTERNAL_URL="http://${LOKI_CONTAINER}:3100"
 
-# 先檢查是否已存在
-EXISTING=$(curl -sf -u "admin:${GRAFANA_ADMIN_PASS}" \
-    "http://${PMM_SERVER_IP}:8080/graph/api/datasources/name/Loki" 2>/dev/null || true)
+# PMM Grafana 跑在 pmm-server 容器內，透過 127.0.0.1:18443 存取
+# 試幾種常見的 Grafana API 路徑
+GRAFANA_API=""
+for BASE_URL in "https://127.0.0.1:18443/graph" "https://127.0.0.1:18443" "http://127.0.0.1:3000"; do
+    if curl -skf -u "admin:${GRAFANA_ADMIN_PASS}" "${BASE_URL}/api/datasources" > /dev/null 2>&1; then
+        GRAFANA_API="${BASE_URL}"
+        break
+    fi
+done
 
-if echo "${EXISTING}" | grep -q '"id"'; then
-    echo "Loki datasource 已存在，跳過"
+if [ -z "${GRAFANA_API}" ]; then
+    echo "⚠️  無法連接 Grafana API，請手動新增 Loki datasource"
+    echo "   PMM Grafana → Configuration → Data Sources → Add → Loki"
+    echo "   URL: ${LOKI_INTERNAL_URL}"
 else
-    HTTP_CODE=$(curl -sf -o /dev/null -w "%{http_code}" \
-        -u "admin:${GRAFANA_ADMIN_PASS}" \
-        -X POST "http://${PMM_SERVER_IP}:8080/graph/api/datasources" \
-        -H "Content-Type: application/json" \
-        -d "{
-            \"name\": \"Loki\",
-            \"type\": \"loki\",
-            \"url\": \"${LOKI_INTERNAL_URL}\",
-            \"access\": \"proxy\",
-            \"isDefault\": false
-        }" 2>/dev/null || echo "000")
+    echo "Grafana API: ${GRAFANA_API}"
 
-    if [ "${HTTP_CODE}" = "200" ] || [ "${HTTP_CODE}" = "409" ]; then
-        echo "✅ Loki datasource 已加入 Grafana"
+    # 先檢查是否已存在
+    EXISTING=$(curl -skf -u "admin:${GRAFANA_ADMIN_PASS}" \
+        "${GRAFANA_API}/api/datasources/name/Loki" 2>/dev/null || true)
+
+    if echo "${EXISTING}" | grep -q '"id"'; then
+        echo "Loki datasource 已存在，跳過"
     else
-        echo "⚠️  Grafana datasource 設定失敗 (HTTP ${HTTP_CODE})"
-        echo "可手動在 PMM Grafana → Configuration → Data Sources 中新增 Loki"
-        echo "URL: ${LOKI_INTERNAL_URL}"
+        HTTP_CODE=$(curl -sk -o /dev/null -w "%{http_code}" \
+            -u "admin:${GRAFANA_ADMIN_PASS}" \
+            -X POST "${GRAFANA_API}/api/datasources" \
+            -H "Content-Type: application/json" \
+            -d "{
+                \"name\": \"Loki\",
+                \"type\": \"loki\",
+                \"url\": \"${LOKI_INTERNAL_URL}\",
+                \"access\": \"proxy\",
+                \"isDefault\": false
+            }" 2>/dev/null || echo "000")
+
+        if [ "${HTTP_CODE}" = "200" ] || [ "${HTTP_CODE}" = "409" ]; then
+            echo "✅ Loki datasource 已加入 Grafana"
+        else
+            echo "⚠️  Grafana datasource 設定失敗 (HTTP ${HTTP_CODE})"
+            echo "   請手動在 PMM Grafana → Configuration → Data Sources 中新增 Loki"
+            echo "   URL: ${LOKI_INTERNAL_URL}"
+        fi
     fi
 fi
 
