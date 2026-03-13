@@ -1,10 +1,10 @@
 {
-  "uid": "mssql-simple-multidb",
-  "title": "MSSQL - Simple Multi-DB (env/node)",
-  "tags": ["mssql", "simple", "multidb"],
+  "uid": "mssql-overview",
+  "title": "MSSQL - Overview",
+  "tags": ["mssql", "database", "monitoring"],
   "timezone": "browser",
   "schemaVersion": 38,
-  "version": 1,
+  "version": 2,
   "refresh": "30s",
   "time": { "from": "now-1h", "to": "now" },
   "templating": {
@@ -19,7 +19,7 @@
       {
         "type": "query",
         "name": "env",
-        "label": "env",
+        "label": "Environment",
         "datasource": { "type": "prometheus", "uid": "${DS_METRICS}" },
         "refresh": 1,
         "query": { "query": "label_values(mssql_up, env)" }
@@ -27,7 +27,7 @@
       {
         "type": "query",
         "name": "node",
-        "label": "node",
+        "label": "Node",
         "datasource": { "type": "prometheus", "uid": "${DS_METRICS}" },
         "refresh": 1,
         "query": { "query": "label_values(mssql_up{env=\"$env\"}, node)" }
@@ -35,7 +35,7 @@
       {
         "type": "query",
         "name": "db",
-        "label": "database",
+        "label": "Database",
         "datasource": { "type": "prometheus", "uid": "${DS_METRICS}" },
         "refresh": 1,
         "includeAll": true,
@@ -48,83 +48,424 @@
   },
   "panels": [
     {
+      "id": 100,
+      "type": "row",
+      "title": "Instance Status",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "collapsed": false
+    },
+    {
       "id": 1,
       "type": "stat",
       "title": "MSSQL Up",
-      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 0 },
+      "description": "1 = running, 0 = down",
+      "gridPos": { "h": 4, "w": 3, "x": 0, "y": 1 },
       "datasource": { "type": "prometheus", "uid": "${DS_METRICS}" },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            { "type": "value", "options": { "1": { "text": "UP", "color": "green" }, "0": { "text": "DOWN", "color": "red" } } }
+          ],
+          "thresholds": { "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] }
+        }
+      },
       "targets": [
         { "expr": "max(mssql_up{env=\"$env\",node=\"$node\"})", "refId": "A" }
       ]
     },
     {
       "id": 2,
-      "type": "timeseries",
-      "title": "Active Connections",
-      "gridPos": { "h": 8, "w": 18, "x": 6, "y": 0 },
+      "type": "stat",
+      "title": "Connections",
+      "gridPos": { "h": 4, "w": 3, "x": 3, "y": 1 },
       "datasource": { "type": "prometheus", "uid": "${DS_METRICS}" },
-      "targets": [
-        {
-          "expr": "mssql_connections{env=\"$env\",node=\"$node\"}",
-          "legendFormat": "connections",
-          "refId": "A"
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": { "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 200 }, { "color": "red", "value": 500 }] }
         }
+      },
+      "targets": [
+        { "expr": "mssql_connections{env=\"$env\",node=\"$node\"}", "refId": "A" }
       ]
     },
     {
       "id": 3,
-      "type": "timeseries",
-      "title": "Batch Requests / sec",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 6 },
+      "type": "stat",
+      "title": "Batch Requests/s",
+      "gridPos": { "h": 4, "w": 3, "x": 6, "y": 1 },
       "datasource": { "type": "prometheus", "uid": "${DS_METRICS}" },
-      "targets": [
-        {
-          "expr": "rate(mssql_batch_requests{env=\"$env\",node=\"$node\"}[5m])",
-          "legendFormat": "batch/s",
-          "refId": "A"
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops",
+          "thresholds": { "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 1000 }, { "color": "red", "value": 5000 }] }
         }
+      },
+      "targets": [
+        { "expr": "rate(mssql_batch_requests{env=\"$env\",node=\"$node\"}[5m])", "refId": "A" }
       ]
     },
     {
       "id": 4,
-      "type": "timeseries",
-      "title": "Deadlocks / sec (instance)",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 6 },
+      "type": "stat",
+      "title": "Deadlocks/s",
+      "gridPos": { "h": 4, "w": 3, "x": 9, "y": 1 },
       "datasource": { "type": "prometheus", "uid": "${DS_METRICS}" },
-      "targets": [
-        {
-          "expr": "rate(mssql_deadlocks{env=\"$env\",node=\"$node\"}[5m])",
-          "legendFormat": "deadlocks/s",
-          "refId": "A"
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops",
+          "decimals": 3,
+          "thresholds": { "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 0.01 }, { "color": "red", "value": 0.1 }] }
         }
+      },
+      "targets": [
+        { "expr": "rate(mssql_deadlocks{env=\"$env\",node=\"$node\"}[5m])", "refId": "A" }
       ]
     },
     {
       "id": 5,
-      "type": "timeseries",
-      "title": "Database State",
-      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 14 },
+      "type": "stat",
+      "title": "Page Life Expectancy",
+      "description": "Buffer pool page life (sec). Below 300 = memory pressure.",
+      "gridPos": { "h": 4, "w": 3, "x": 12, "y": 1 },
       "datasource": { "type": "prometheus", "uid": "${DS_METRICS}" },
-      "targets": [
-        {
-          "expr": "mssql_database_state{env=\"$env\",node=\"$node\",database=~\"$db\"}",
-          "legendFormat": "{{database}}",
-          "refId": "A"
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "thresholds": { "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 300 }, { "color": "green", "value": 1000 }] }
         }
+      },
+      "targets": [
+        { "expr": "mssql_page_life_expectancy{env=\"$env\",node=\"$node\"}", "refId": "A" }
       ]
     },
     {
       "id": 6,
-      "type": "timeseries",
-      "title": "Database File Size",
-      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 22 },
+      "type": "stat",
+      "title": "Buffer Cache Hit %",
+      "description": "Higher is better. Below 90% = memory issue.",
+      "gridPos": { "h": 4, "w": 3, "x": 15, "y": 1 },
       "datasource": { "type": "prometheus", "uid": "${DS_METRICS}" },
-      "targets": [
-        {
-          "expr": "mssql_database_filesize{env=\"$env\",node=\"$node\",database=~\"$db\"}",
-          "legendFormat": "{{database}}",
-          "refId": "A"
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "thresholds": { "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 90 }, { "color": "green", "value": 98 }] }
         }
+      },
+      "targets": [
+        { "expr": "mssql_buffer_cache_hit_ratio{env=\"$env\",node=\"$node\"}", "refId": "A" }
+      ]
+    },
+    {
+      "id": 7,
+      "type": "stat",
+      "title": "User Errors/s",
+      "gridPos": { "h": 4, "w": 3, "x": 18, "y": 1 },
+      "datasource": { "type": "prometheus", "uid": "${DS_METRICS}" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops",
+          "decimals": 2,
+          "thresholds": { "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 1 }, { "color": "red", "value": 10 }] }
+        }
+      },
+      "targets": [
+        { "expr": "rate(mssql_user_errors{env=\"$env\",node=\"$node\"}[5m])", "refId": "A" }
+      ]
+    },
+    {
+      "id": 8,
+      "type": "stat",
+      "title": "Kill Conn Errors/s",
+      "gridPos": { "h": 4, "w": 3, "x": 21, "y": 1 },
+      "datasource": { "type": "prometheus", "uid": "${DS_METRICS}" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops",
+          "decimals": 2,
+          "thresholds": { "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 0.1 }, { "color": "red", "value": 1 }] }
+        }
+      },
+      "targets": [
+        { "expr": "rate(mssql_kill_connection_errors{env=\"$env\",node=\"$node\"}[5m])", "refId": "A" }
+      ]
+    },
+
+    {
+      "id": 200,
+      "type": "row",
+      "title": "Activity & Throughput",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 5 },
+      "collapsed": false
+    },
+    {
+      "id": 21,
+      "type": "timeseries",
+      "title": "Connections Over Time",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 6 },
+      "datasource": { "type": "prometheus", "uid": "${DS_METRICS}" },
+      "fieldConfig": { "defaults": { "custom": { "fillOpacity": 15 } } },
+      "targets": [
+        { "expr": "mssql_connections{env=\"$env\",node=\"$node\"}", "legendFormat": "connections", "refId": "A" }
+      ]
+    },
+    {
+      "id": 22,
+      "type": "timeseries",
+      "title": "Batch Requests / sec",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 6 },
+      "datasource": { "type": "prometheus", "uid": "${DS_METRICS}" },
+      "fieldConfig": { "defaults": { "unit": "ops", "custom": { "fillOpacity": 15 } } },
+      "targets": [
+        { "expr": "rate(mssql_batch_requests{env=\"$env\",node=\"$node\"}[5m])", "legendFormat": "batch/s", "refId": "A" }
+      ]
+    },
+    {
+      "id": 23,
+      "type": "timeseries",
+      "title": "SQL Compilations & Recompilations / sec",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 14 },
+      "datasource": { "type": "prometheus", "uid": "${DS_METRICS}" },
+      "fieldConfig": { "defaults": { "unit": "ops", "custom": { "fillOpacity": 10 } } },
+      "targets": [
+        { "expr": "rate(mssql_compilations{env=\"$env\",node=\"$node\"}[5m])", "legendFormat": "compilations/s", "refId": "A" },
+        { "expr": "rate(mssql_recompilations{env=\"$env\",node=\"$node\"}[5m])", "legendFormat": "recompilations/s", "refId": "B" }
+      ]
+    },
+    {
+      "id": 24,
+      "type": "timeseries",
+      "title": "Deadlocks & Errors / sec",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 14 },
+      "datasource": { "type": "prometheus", "uid": "${DS_METRICS}" },
+      "fieldConfig": { "defaults": { "unit": "ops", "custom": { "fillOpacity": 10 } } },
+      "targets": [
+        { "expr": "rate(mssql_deadlocks{env=\"$env\",node=\"$node\"}[5m])", "legendFormat": "deadlocks/s", "refId": "A" },
+        { "expr": "rate(mssql_user_errors{env=\"$env\",node=\"$node\"}[5m])", "legendFormat": "user errors/s", "refId": "B" },
+        { "expr": "rate(mssql_kill_connection_errors{env=\"$env\",node=\"$node\"}[5m])", "legendFormat": "kill conn errors/s", "refId": "C" }
+      ]
+    },
+
+    {
+      "id": 300,
+      "type": "row",
+      "title": "Memory & Buffer",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 22 },
+      "collapsed": false
+    },
+    {
+      "id": 31,
+      "type": "timeseries",
+      "title": "Page Life Expectancy",
+      "description": "Below 300s indicates memory pressure",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 23 },
+      "datasource": { "type": "prometheus", "uid": "${DS_METRICS}" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "custom": { "fillOpacity": 15 },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 300 }, { "color": "green", "value": 1000 }]
+          },
+          "custom": { "fillOpacity": 15, "thresholdsStyle": { "mode": "line" } }
+        }
+      },
+      "targets": [
+        { "expr": "mssql_page_life_expectancy{env=\"$env\",node=\"$node\"}", "legendFormat": "PLE", "refId": "A" }
+      ]
+    },
+    {
+      "id": 32,
+      "type": "timeseries",
+      "title": "Buffer Cache Hit Ratio",
+      "description": "Should stay above 90%",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 23 },
+      "datasource": { "type": "prometheus", "uid": "${DS_METRICS}" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "custom": { "fillOpacity": 15 }
+        }
+      },
+      "targets": [
+        { "expr": "mssql_buffer_cache_hit_ratio{env=\"$env\",node=\"$node\"}", "legendFormat": "cache hit %", "refId": "A" }
+      ]
+    },
+    {
+      "id": 33,
+      "type": "timeseries",
+      "title": "Memory Utilization",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 31 },
+      "datasource": { "type": "prometheus", "uid": "${DS_METRICS}" },
+      "fieldConfig": { "defaults": { "unit": "decbytes", "custom": { "fillOpacity": 15 } } },
+      "targets": [
+        { "expr": "mssql_total_physical_memory_kb{env=\"$env\",node=\"$node\"} * 1024", "legendFormat": "total physical", "refId": "A" },
+        { "expr": "mssql_available_physical_memory_kb{env=\"$env\",node=\"$node\"} * 1024", "legendFormat": "available physical", "refId": "B" }
+      ]
+    },
+    {
+      "id": 34,
+      "type": "timeseries",
+      "title": "Memory Utilization %",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 31 },
+      "datasource": { "type": "prometheus", "uid": "${DS_METRICS}" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "custom": { "fillOpacity": 15 },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 80 }, { "color": "red", "value": 95 }]
+          }
+        }
+      },
+      "targets": [
+        { "expr": "mssql_memory_utilization_percentage{env=\"$env\",node=\"$node\"}", "legendFormat": "memory used %", "refId": "A" }
+      ]
+    },
+
+    {
+      "id": 400,
+      "type": "row",
+      "title": "I/O Performance",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 39 },
+      "collapsed": false
+    },
+    {
+      "id": 41,
+      "type": "timeseries",
+      "title": "Page Reads & Writes / sec",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 40 },
+      "datasource": { "type": "prometheus", "uid": "${DS_METRICS}" },
+      "fieldConfig": { "defaults": { "unit": "ops", "custom": { "fillOpacity": 10 } } },
+      "targets": [
+        { "expr": "rate(mssql_page_reads{env=\"$env\",node=\"$node\"}[5m])", "legendFormat": "page reads/s", "refId": "A" },
+        { "expr": "rate(mssql_page_writes{env=\"$env\",node=\"$node\"}[5m])", "legendFormat": "page writes/s", "refId": "B" }
+      ]
+    },
+    {
+      "id": 42,
+      "type": "timeseries",
+      "title": "Checkpoint & Lazy Writes / sec",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 40 },
+      "datasource": { "type": "prometheus", "uid": "${DS_METRICS}" },
+      "fieldConfig": { "defaults": { "unit": "ops", "custom": { "fillOpacity": 10 } } },
+      "targets": [
+        { "expr": "rate(mssql_checkpoint_pages{env=\"$env\",node=\"$node\"}[5m])", "legendFormat": "checkpoint pages/s", "refId": "A" },
+        { "expr": "rate(mssql_lazy_writes{env=\"$env\",node=\"$node\"}[5m])", "legendFormat": "lazy writes/s", "refId": "B" }
+      ]
+    },
+    {
+      "id": 43,
+      "type": "timeseries",
+      "title": "I/O Stall (Read) by Database",
+      "description": "Cumulative I/O read stall time",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 48 },
+      "datasource": { "type": "prometheus", "uid": "${DS_METRICS}" },
+      "fieldConfig": { "defaults": { "unit": "ms", "custom": { "fillOpacity": 10 } } },
+      "targets": [
+        { "expr": "rate(mssql_io_stall{env=\"$env\",node=\"$node\",database=~\"$db\",type=\"read\"}[5m])", "legendFormat": "{{database}} read stall", "refId": "A" }
+      ]
+    },
+    {
+      "id": 44,
+      "type": "timeseries",
+      "title": "I/O Stall (Write) by Database",
+      "description": "Cumulative I/O write stall time",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 48 },
+      "datasource": { "type": "prometheus", "uid": "${DS_METRICS}" },
+      "fieldConfig": { "defaults": { "unit": "ms", "custom": { "fillOpacity": 10 } } },
+      "targets": [
+        { "expr": "rate(mssql_io_stall{env=\"$env\",node=\"$node\",database=~\"$db\",type=\"write\"}[5m])", "legendFormat": "{{database}} write stall", "refId": "B" }
+      ]
+    },
+
+    {
+      "id": 500,
+      "type": "row",
+      "title": "Database Details",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 56 },
+      "collapsed": false
+    },
+    {
+      "id": 51,
+      "type": "table",
+      "title": "Database State",
+      "description": "0=ONLINE, 1=RESTORING, 2=RECOVERING, 3=RECOVERY_PENDING, 4=SUSPECT, 5=EMERGENCY, 6=OFFLINE",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 57 },
+      "datasource": { "type": "prometheus", "uid": "${DS_METRICS}" },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "Value" },
+            "properties": [
+              { "id": "mappings", "value": [
+                { "type": "value", "options": {
+                  "0": { "text": "ONLINE", "color": "green" },
+                  "1": { "text": "RESTORING", "color": "yellow" },
+                  "2": { "text": "RECOVERING", "color": "yellow" },
+                  "3": { "text": "RECOVERY_PENDING", "color": "orange" },
+                  "4": { "text": "SUSPECT", "color": "red" },
+                  "5": { "text": "EMERGENCY", "color": "red" },
+                  "6": { "text": "OFFLINE", "color": "red" }
+                }}
+              ]},
+              { "id": "custom.displayMode", "value": "color-background" }
+            ]
+          }
+        ]
+      },
+      "transformations": [
+        { "id": "labelsToFields", "options": {} },
+        { "id": "organize", "options": { "excludeByName": { "Time": true, "env": true, "node": true, "job": true, "instance": true, "service_name": true }, "renameByName": { "database": "Database", "Value": "State" } } }
+      ],
+      "targets": [
+        { "expr": "mssql_database_state{env=\"$env\",node=\"$node\",database=~\"$db\"}", "format": "table", "instant": true, "refId": "A" }
+      ]
+    },
+    {
+      "id": 52,
+      "type": "bargauge",
+      "title": "Database File Size",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 57 },
+      "datasource": { "type": "prometheus", "uid": "${DS_METRICS}" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "decbytes",
+          "thresholds": { "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 1073741824 }, { "color": "red", "value": 10737418240 }] }
+        }
+      },
+      "options": { "displayMode": "gradient", "orientation": "horizontal" },
+      "targets": [
+        { "expr": "mssql_database_filesize{env=\"$env\",node=\"$node\",database=~\"$db\"}", "legendFormat": "{{database}}", "refId": "A" }
+      ]
+    },
+    {
+      "id": 53,
+      "type": "timeseries",
+      "title": "Log Growths by Database",
+      "description": "Frequent log growths may indicate autogrow issues",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 65 },
+      "datasource": { "type": "prometheus", "uid": "${DS_METRICS}" },
+      "fieldConfig": { "defaults": { "custom": { "fillOpacity": 10, "drawStyle": "bars" } } },
+      "targets": [
+        { "expr": "increase(mssql_log_growths{env=\"$env\",node=\"$node\",database=~\"$db\"}[1h])", "legendFormat": "{{database}}", "refId": "A" }
+      ]
+    },
+    {
+      "id": 54,
+      "type": "timeseries",
+      "title": "Transactions / sec by Database",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 65 },
+      "datasource": { "type": "prometheus", "uid": "${DS_METRICS}" },
+      "fieldConfig": { "defaults": { "unit": "ops", "custom": { "fillOpacity": 10 } } },
+      "targets": [
+        { "expr": "rate(mssql_transactions{env=\"$env\",node=\"$node\",database=~\"$db\"}[5m])", "legendFormat": "{{database}}", "refId": "A" }
       ]
     }
   ]

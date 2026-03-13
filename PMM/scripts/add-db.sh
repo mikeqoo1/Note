@@ -388,8 +388,10 @@ add_mssql() {
   db_pass=$(read_password "MSSQL 密碼")
 
   # ----- 服務與 Exporter 設定 -----
-  local service_name exporter_name exporter_port docker_network
+  local service_name exporter_name exporter_port docker_network mssql_env mssql_node
   service_name=$(read_input "PMM 服務名稱（例如 mssql-prod-01）" "" "required")
+  mssql_env=$(read_input "Environment label（Dashboard 篩選用）" "production")
+  mssql_node=$(read_input "Node label（Dashboard 篩選用）" "$(hostname -s)")
   exporter_name=$(read_input "Exporter 容器名稱" "mssql-exporter-${service_name}")
   exporter_port=$(read_input "Exporter 對外 Port" "4000")
   docker_network=$(read_input "Docker Network（讓 exporter 連到 MSSQL）" "pmm-net")
@@ -491,8 +493,8 @@ EOF
     --scheme="http" \
     --metrics-path="/metrics" \
     --listen-port="${exporter_port}" \
-    --environment="production" \
-    --custom-labels="dbtype=mssql,service=${service_name}" \
+    --environment="${mssql_env}" \
+    --custom-labels="dbtype=mssql,env=${mssql_env},node=${mssql_node}" \
     --metrics-mode="pull"
 
   info "MSSQL 註冊完成: ${service_name}"
@@ -694,7 +696,7 @@ EOF
     --metrics-path="/metrics" \
     --listen-port="${exporter_port}" \
     --environment="demo" \
-    --custom-labels="dbtype=mssql,service=demo" \
+    --custom-labels="dbtype=mssql,env=demo,node=$(hostname -s)" \
     --metrics-mode="pull" 2>&1; then
     info "MSSQL 加入成功 ✓"
     success=$((success + 1))
