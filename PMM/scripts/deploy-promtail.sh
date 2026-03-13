@@ -14,7 +14,7 @@ set -euo pipefail
 
 PROMTAIL_VERSION="3.4.2"
 PROMTAIL_CONTAINER="promtail"
-PROMTAIL_CONFIG_DIR="/opt/promtail"
+PROMTAIL_CONFIG_DIR="/data/promtail"
 PMM_NETWORK="pmm-net"
 
 LOKI_URL="${1:-}"
