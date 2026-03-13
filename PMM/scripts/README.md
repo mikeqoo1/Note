@@ -120,7 +120,11 @@ sudo bash scripts/deploy-demo-dbs.sh cleanup
 |--------|---------|-----------|------------|---------|---------|
 | MariaDB | demo-mariadb | 3307 | 3306 | demo_shop (customers/products/orders) | pmm / PmmMaria!234 |
 | PostgreSQL | demo-postgres | 5433 | 5432 | demo_shop (employees/projects/assignments) | pmm / PmmPostgres!234 |
-| MSSQL | demo-mssql | 2433 | 1433 | demo_shop (departments/tickets) | pmm / PmmMssql!234 |
+| MSSQL | demo-mssql | 2433 | 1433 | demo_shop (departments/tickets) | pmm / Str0ng#Audit789! |
+
+> **MSSQL Exporter 說明**：使用 `burningalchemist/sql_exporter`（Go-based），
+> 預設 Port **9399**。原 `awaragi/prometheus-mssql-exporter`（Node.js/tedious）
+> 因 TLS 與 MSSQL 2022 不相容已棄用。
 
 ### Audit 設定
 

@@ -9,7 +9,12 @@ set -euo pipefail
 
 # ----- 預設值 -----
 PMM_CLIENT_CONTAINER="${PMM_CLIENT_CONTAINER:-pmm-client}"
-MSSQL_EXPORTER_IMAGE="awaragi/prometheus-mssql-exporter:latest"
+# 變更紀錄：從 awaragi/prometheus-mssql-exporter (Node.js/tedious) 改為
+# burningalchemist/sql_exporter (Go/go-mssqldb)。
+# 原因：awaragi 的 tedious driver v16+ 與 MSSQL 2022 TLS 握手不相容，
+#       導致 "Connection lost - socket hang up"，不同機器 pull 到不同版本會有不同結果。
+#       Go-based 的 sql_exporter 使用微軟官方 go-mssqldb driver，完全相容 MSSQL 2022。
+MSSQL_EXPORTER_IMAGE="burningalchemist/sql_exporter:latest"
 
 # ----- 顏色 -----
 RED='\033[0;31m'
@@ -67,6 +72,198 @@ show_running_containers() {
     sudo docker ps --format "table {{.Names}}\t{{.Image}}\t{{.Status}}" | grep -v "pmm" || echo "  （無）"
     echo
   } >&2
+}
+
+# URL-encode 密碼（用於 sql_exporter DSN）
+url_encode_password() {
+  if command -v python3 >/dev/null 2>&1; then
+    printf '%s' "$1" | python3 -c "import sys,urllib.parse;print(urllib.parse.quote(sys.stdin.read(),safe=''))"
+  else
+    # fallback: 處理常見特殊字元
+    printf '%s' "$1" | sed \
+      -e 's/%/%25/g' -e 's/ /%20/g' -e 's/!/%21/g' -e 's/#/%23/g' \
+      -e 's/\$/%24/g' -e 's/&/%26/g' -e "s/'/%27/g" -e 's/(/%28/g' \
+      -e 's/)/%29/g' -e 's/+/%2B/g' -e 's/:/%3A/g' -e 's/;/%3B/g' \
+      -e 's/=/%3D/g' -e 's/?/%3F/g' -e 's/@/%40/g'
+  fi
+}
+
+# 寫入 sql_exporter 主設定檔
+write_mssql_exporter_config() {
+  local config_path="$1" dsn="$2"
+  sudo tee "${config_path}" >/dev/null <<YAMLDOC
+global:
+  scrape_timeout_offset: 500ms
+  min_interval: 0s
+  max_connections: 3
+  max_idle_connections: 3
+
+target:
+  data_source_name: '${dsn}'
+  collectors:
+    - mssql_standard
+
+collector_files:
+  - "/etc/sql_exporter/*.collector.yml"
+YAMLDOC
+}
+
+# 寫入 MSSQL Collector 定義（Prometheus metric 對應的 SQL 查詢）
+write_mssql_collector() {
+  sudo tee "$1" >/dev/null <<'YAMLDOC'
+collector_name: mssql_standard
+metrics:
+  - metric_name: mssql_up
+    type: gauge
+    help: "MSSQL instance UP status"
+    values: [status]
+    query: "SELECT 1 AS status"
+
+  - metric_name: mssql_product_version
+    type: gauge
+    help: "MSSQL product version (Major.Minor)"
+    values: [version]
+    query: |
+      SELECT CAST(SERVERPROPERTY('ProductMajorVersion') AS float)
+        + CAST(SERVERPROPERTY('ProductMinorVersion') AS float) / 10.0 AS version
+
+  - metric_name: mssql_instance_local_time
+    type: gauge
+    help: "Seconds since epoch on local instance"
+    values: [timestamp]
+    query: "SELECT DATEDIFF(SECOND, '1970-01-01', GETUTCDATE()) AS timestamp"
+
+  - metric_name: mssql_connections
+    type: gauge
+    help: "Number of active connections by database"
+    key_labels: [database, state]
+    values: [connections]
+    query: |
+      SELECT DB_NAME(dbid) AS [database], 'current' AS [state], COUNT(*) AS connections
+      FROM sys.sysprocesses WHERE dbid > 0 GROUP BY dbid
+
+  - metric_name: mssql_client_connections
+    type: gauge
+    help: "Number of active client connections"
+    values: [connections]
+    query: "SELECT COUNT(*) AS connections FROM sys.dm_exec_connections"
+
+  - metric_name: mssql_deadlocks
+    type: gauge
+    help: "Number of deadlocks (cumulative)"
+    values: [deadlocks]
+    query: |
+      SELECT cntr_value AS deadlocks FROM sys.dm_os_performance_counters
+      WHERE counter_name = 'Number of Deadlocks/sec' AND instance_name = '_Total'
+
+  - metric_name: mssql_user_errors
+    type: gauge
+    help: "Number of user errors (cumulative)"
+    values: [errors]
+    query: |
+      SELECT cntr_value AS errors FROM sys.dm_os_performance_counters
+      WHERE counter_name = 'Errors/sec' AND instance_name = 'User Errors'
+
+  - metric_name: mssql_kill_connection_errors
+    type: gauge
+    help: "Number of kill connection errors (cumulative)"
+    values: [errors]
+    query: |
+      SELECT cntr_value AS errors FROM sys.dm_os_performance_counters
+      WHERE counter_name = 'Errors/sec' AND instance_name = 'Kill Connection Errors'
+
+  - metric_name: mssql_page_life_expectancy
+    type: gauge
+    help: "Page life expectancy in seconds"
+    values: [seconds]
+    query: |
+      SELECT cntr_value AS seconds FROM sys.dm_os_performance_counters
+      WHERE counter_name = 'Page life expectancy' AND object_name LIKE '%Buffer Manager%'
+
+  - metric_name: mssql_batch_requests
+    type: gauge
+    help: "Batch requests (cumulative)"
+    values: [requests]
+    query: |
+      SELECT cntr_value AS requests FROM sys.dm_os_performance_counters
+      WHERE counter_name = 'Batch Requests/sec'
+
+  - metric_name: mssql_compilations
+    type: gauge
+    help: "SQL compilations (cumulative)"
+    values: [compilations]
+    query: |
+      SELECT cntr_value AS compilations FROM sys.dm_os_performance_counters
+      WHERE counter_name = 'SQL Compilations/sec'
+
+  - metric_name: mssql_recompilations
+    type: gauge
+    help: "SQL re-compilations (cumulative)"
+    values: [recompilations]
+    query: |
+      SELECT cntr_value AS recompilations FROM sys.dm_os_performance_counters
+      WHERE counter_name = 'SQL Re-Compilations/sec'
+
+  - metric_name: mssql_buffer_cache_hit_ratio
+    type: gauge
+    help: "Buffer cache hit ratio percentage"
+    values: [ratio]
+    query: |
+      SELECT CAST(a.cntr_value AS float) / NULLIF(CAST(b.cntr_value AS float), 0) * 100.0 AS ratio
+      FROM sys.dm_os_performance_counters a
+      CROSS JOIN sys.dm_os_performance_counters b
+      WHERE a.counter_name = 'Buffer cache hit ratio'
+        AND a.object_name LIKE '%Buffer Manager%'
+        AND b.counter_name = 'Buffer cache hit ratio base'
+        AND b.object_name LIKE '%Buffer Manager%'
+
+  - metric_name: mssql_checkpoint_pages
+    type: gauge
+    help: "Checkpoint pages (cumulative)"
+    values: [pages]
+    query: |
+      SELECT cntr_value AS pages FROM sys.dm_os_performance_counters
+      WHERE counter_name = 'Checkpoint pages/sec'
+
+  - metric_name: mssql_io_stall
+    type: gauge
+    help: "IO stall time in milliseconds by database and type"
+    key_labels: [database, type]
+    values: [stall]
+    query: |
+      SELECT DB_NAME(database_id) AS [database], 'read' AS [type], SUM(io_stall_read_ms) AS stall
+      FROM sys.dm_io_virtual_file_stats(NULL, NULL) GROUP BY database_id
+      UNION ALL
+      SELECT DB_NAME(database_id), 'write', SUM(io_stall_write_ms)
+      FROM sys.dm_io_virtual_file_stats(NULL, NULL) GROUP BY database_id
+
+  - metric_name: mssql_io_stall_total
+    type: gauge
+    help: "Total IO stall time in milliseconds by database"
+    key_labels: [database]
+    values: [stall]
+    query: |
+      SELECT DB_NAME(database_id) AS [database], SUM(io_stall) AS stall
+      FROM sys.dm_io_virtual_file_stats(NULL, NULL) GROUP BY database_id
+
+  - metric_name: mssql_database_filesize
+    type: gauge
+    help: "Database file size in bytes"
+    key_labels: [database, type]
+    values: [size]
+    query: |
+      SELECT DB_NAME(database_id) AS [database],
+        CASE type WHEN 0 THEN 'data' WHEN 1 THEN 'log' ELSE 'other' END AS [type],
+        SUM(CAST(size AS bigint) * 8192) AS size
+      FROM sys.master_files GROUP BY database_id, type
+
+  - metric_name: mssql_database_state
+    type: gauge
+    help: "Database state (0=ONLINE,1=RESTORING,2=RECOVERING,4=SUSPECT,6=OFFLINE)"
+    key_labels: [database]
+    values: [state]
+    query: "SELECT name AS [database], state FROM sys.databases"
+YAMLDOC
 }
 
 # 檢查 pmm-client 容器是否運行，並偵測 listen port
@@ -393,7 +590,7 @@ add_mssql() {
   mssql_env=$(read_input "Environment label（Dashboard 篩選用）" "production")
   mssql_node=$(read_input "Node label（Dashboard 篩選用）" "$(hostname -s)")
   exporter_name=$(read_input "Exporter 容器名稱" "mssql-exporter-${service_name}")
-  exporter_port=$(read_input "Exporter 對外 Port" "4000")
+  exporter_port=$(read_input "Exporter 對外 Port" "9399")
   docker_network=$(read_input "Docker Network（讓 exporter 連到 MSSQL）" "pmm-net")
 
   # ----- 是否建立 PMM 帳號 -----
@@ -413,7 +610,7 @@ add_mssql() {
   -Q \"
 IF NOT EXISTS (SELECT 1 FROM sys.server_principals WHERE name = '${db_user}')
 BEGIN
-  CREATE LOGIN [${db_user}] WITH PASSWORD = '${db_pass}', CHECK_POLICY = ON, CHECK_EXPIRATION = OFF;
+  CREATE LOGIN [${db_user}] WITH PASSWORD = '${db_pass}', CHECK_POLICY = OFF, CHECK_EXPIRATION = OFF;
 END;
 IF NOT EXISTS (SELECT 1 FROM sys.database_principals WHERE name = '${db_user}')
 BEGIN
@@ -444,20 +641,17 @@ ALTER SERVER ROLE sysadmin ADD MEMBER [${db_user}];
   # ----- 建立 Docker Network -----
   sudo docker network create "${docker_network}" 2>/dev/null || true
 
-  # ----- 建立 Exporter env 檔 -----
-  local env_dir="/data/mssql-exporter/${service_name}"
-  sudo mkdir -p "${env_dir}"
-  sudo tee "${env_dir}/env" >/dev/null <<EOF
-SERVER=${db_host}
-PORT=${db_port}
-USERNAME=${db_user}
-PASSWORD=${db_pass}
-ENCRYPT=true
-TRUST_SERVER_CERTIFICATE=true
-EXPOSE=${exporter_port}
-EOF
-  sudo chmod 600 "${env_dir}/env"
-  info "Exporter env 檔: ${env_dir}/env"
+  # ----- 建立 Exporter 設定（YAML） -----
+  local config_dir="/data/mssql-exporter/${service_name}"
+  sudo mkdir -p "${config_dir}"
+
+  local encoded_pass
+  encoded_pass=$(url_encode_password "${db_pass}")
+  local dsn="sqlserver://${db_user}:${encoded_pass}@${db_host}:${db_port}?encrypt=disable&TrustServerCertificate=true"
+
+  write_mssql_exporter_config "${config_dir}/sql_exporter.yml" "${dsn}"
+  write_mssql_collector "${config_dir}/mssql.collector.yml"
+  info "Exporter 設定: ${config_dir}/"
 
   # ----- 啟動 Exporter -----
   info "啟動 MSSQL Exporter: ${exporter_name} ..."
@@ -466,9 +660,11 @@ EOF
     --name "${exporter_name}" \
     --restart unless-stopped \
     --network "${docker_network}" \
-    --env-file "${env_dir}/env" \
-    -p "${exporter_port}:4000" \
-    "${MSSQL_EXPORTER_IMAGE}"
+    -v "${config_dir}/sql_exporter.yml:/etc/sql_exporter/sql_exporter.yml:ro" \
+    -v "${config_dir}/mssql.collector.yml:/etc/sql_exporter/mssql.collector.yml:ro" \
+    -p "${exporter_port}:9399" \
+    "${MSSQL_EXPORTER_IMAGE}" \
+    --config.file=/etc/sql_exporter/sql_exporter.yml
 
   info "等待 Exporter 啟動 ..."
   sleep 3
@@ -494,8 +690,7 @@ EOF
     --metrics-path="/metrics" \
     --listen-port="${exporter_port}" \
     --environment="${mssql_env}" \
-    --custom-labels="dbtype=mssql,env=${mssql_env},node=${mssql_node}" \
-    --metrics-mode="pull"
+    --custom-labels="dbtype=mssql,env=${mssql_env},node=${mssql_node}"
 
   info "MSSQL 註冊完成: ${service_name}"
   echo
@@ -572,7 +767,7 @@ add_demo_all() {
 
   local DEMO_MSSQL_CONTAINER="demo-mssql"
   local DEMO_MSSQL_PMM_USER="pmm"
-  local DEMO_MSSQL_PMM_PASS="PmmMssql!234"
+  local DEMO_MSSQL_PMM_PASS="Str0ng#Audit789!"
 
   # 檢查 Demo 容器是否都在跑
   local all_ok=true
@@ -649,26 +844,26 @@ add_demo_all() {
     fail=$((fail + 1))
   fi
 
-  # --- MSSQL (External Exporter) ---
+  # --- MSSQL (External Exporter via sql_exporter) ---
   echo
   info "[3/3] 加入 MSSQL (External Exporter) ..."
 
-  # 建立 exporter env
-  local exporter_port=4000
+  local exporter_port=9399
   local exporter_name="demo-mssql-exporter"
+  local config_dir="/data/mssql-exporter/demo"
   sudo docker network create pmm-net 2>/dev/null || true
 
-  sudo mkdir -p /data/mssql-exporter/demo
-  sudo tee /data/mssql-exporter/demo/env >/dev/null <<EOF
-SERVER=${mssql_ip}
-PORT=1433
-USERNAME=${DEMO_MSSQL_PMM_USER}
-PASSWORD=${DEMO_MSSQL_PMM_PASS}
-ENCRYPT=true
-TRUST_SERVER_CERTIFICATE=true
-EXPOSE=${exporter_port}
-EOF
-  sudo chmod 600 /data/mssql-exporter/demo/env
+  # 確保 MSSQL 容器在 pmm-net 上
+  sudo docker network connect pmm-net "${DEMO_MSSQL_CONTAINER}" 2>/dev/null || true
+
+  # 建立 sql_exporter 設定（用容器名稱而非 IP，避免重啟後 IP 變動）
+  sudo mkdir -p "${config_dir}"
+  local encoded_pass
+  encoded_pass=$(url_encode_password "${DEMO_MSSQL_PMM_PASS}")
+  local dsn="sqlserver://${DEMO_MSSQL_PMM_USER}:${encoded_pass}@${DEMO_MSSQL_CONTAINER}:1433?encrypt=disable&TrustServerCertificate=true"
+
+  write_mssql_exporter_config "${config_dir}/sql_exporter.yml" "${dsn}"
+  write_mssql_collector "${config_dir}/mssql.collector.yml"
 
   # 啟動 exporter
   sudo docker rm -f "${exporter_name}" 2>/dev/null || true
@@ -676,9 +871,11 @@ EOF
     --name "${exporter_name}" \
     --restart unless-stopped \
     --network pmm-net \
-    --env-file /data/mssql-exporter/demo/env \
-    -p "${exporter_port}:4000" \
-    "${MSSQL_EXPORTER_IMAGE}" >/dev/null 2>&1
+    -v "${config_dir}/sql_exporter.yml:/etc/sql_exporter/sql_exporter.yml:ro" \
+    -v "${config_dir}/mssql.collector.yml:/etc/sql_exporter/mssql.collector.yml:ro" \
+    -p "${exporter_port}:9399" \
+    "${MSSQL_EXPORTER_IMAGE}" \
+    --config.file=/etc/sql_exporter/sql_exporter.yml >/dev/null 2>&1
 
   info "等待 MSSQL Exporter 啟動 ..."
   sleep 5
@@ -696,8 +893,7 @@ EOF
     --metrics-path="/metrics" \
     --listen-port="${exporter_port}" \
     --environment="demo" \
-    --custom-labels="dbtype=mssql,env=demo,node=$(hostname -s)" \
-    --metrics-mode="pull" 2>&1; then
+    --custom-labels="dbtype=mssql,env=demo,node=$(hostname -s)" 2>&1; then
     info "MSSQL 加入成功 ✓"
     success=$((success + 1))
   else

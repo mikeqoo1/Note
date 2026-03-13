@@ -231,7 +231,7 @@ BEGIN
   DROP LOGIN pmm;
 END;
 
-CREATE LOGIN pmm WITH PASSWORD = '\''X9!aZ7#Qp2@Mssql'\'', CHECK_POLICY = ON, CHECK_EXPIRATION = OFF;
+CREATE LOGIN pmm WITH PASSWORD = '\''X9!aZ7#Qp2@Mssql'\'', CHECK_POLICY = OFF, CHECK_EXPIRATION = OFF;
 CREATE USER pmm FOR LOGIN pmm;
 ALTER SERVER ROLE sysadmin ADD MEMBER pmm;
 "
@@ -240,37 +240,52 @@ ALTER SERVER ROLE sysadmin ADD MEMBER pmm;
 
 3) 啟動 MSSQL Exporter（Prometheus）
 
-建立 env 檔
+> **注意**：原本使用 `awaragi/prometheus-mssql-exporter`（Node.js/tedious driver），
+> 但 tedious v16+ 與 MSSQL 2022 的 TLS 握手不相容（"Connection lost - socket hang up"），
+> 已改用 `burningalchemist/sql_exporter`（Go/go-mssqldb driver），完全相容 MSSQL 2022。
+
+建立設定檔
 
 ```bash
 sudo mkdir -p /data/mssql-exporter
 
-sudo tee /data/mssql-exporter/env >/dev/null <<'EOF'
-SERVER=mssql
-PORT=1433
-USERNAME=pmm
-PASSWORD=X9!aZ7#Qp2@Mssql
-ENCRYPT=true
-TRUST_SERVER_CERTIFICATE=true
-EXPOSE=4000
+# 主設定檔（DSN 連線字串）
+# 注意：密碼中的特殊字元需 URL-encode（# → %23, ! → %21）
+sudo tee /data/mssql-exporter/sql_exporter.yml >/dev/null <<'EOF'
+global:
+  scrape_timeout_offset: 500ms
+  min_interval: 0s
+  max_connections: 3
+  max_idle_connections: 3
+
+target:
+  data_source_name: 'sqlserver://pmm:X9%21aZ7%23Qp2%40Mssql@mssql:1433?encrypt=disable&TrustServerCertificate=true'
+  collectors:
+    - mssql_standard
+
+collector_files:
+  - "/etc/sql_exporter/*.collector.yml"
 EOF
 
-sudo chmod 600 /data/mssql-exporter/env
+# Collector 定義檔（SQL 查詢 → Prometheus metrics）
+# 完整內容見 add-db.sh 的 write_mssql_collector() 函式，或從 scripts/ 複製
 ```
 
-啟動 awaragi/mssql-exporter container
+啟動 sql_exporter container
 
 ```bash
 sudo docker rm -f mssql-exporter 2>/dev/null || true
-sudo docker pull awaragi/prometheus-mssql-exporter:latest
+sudo docker pull burningalchemist/sql_exporter:latest
 
 sudo docker run -d \
   --name mssql-exporter \
   --restart unless-stopped \
   --network pmm-net \
-  --env-file /data/mssql-exporter/env \
-  -p 4000:4000 \
-  awaragi/prometheus-mssql-exporter:latest
+  -v /data/mssql-exporter/sql_exporter.yml:/etc/sql_exporter/sql_exporter.yml:ro \
+  -v /data/mssql-exporter/mssql.collector.yml:/etc/sql_exporter/mssql.collector.yml:ro \
+  -p 9399:9399 \
+  burningalchemist/sql_exporter:latest \
+  --config.file=/etc/sql_exporter/sql_exporter.yml
 ```
 
 4) 加進 PMM（External exporter）
@@ -289,10 +304,9 @@ sudo docker exec -it pmm-client pmm-admin add external \
   --service-node-id="$NODE_ID" \
   --scheme="http" \
   --metrics-path="/metrics" \
-  --listen-port=4000 \
+  --listen-port=9399 \
   --environment="qa" \
-  --custom-labels="dbtype=mssql,env=qa,node=EMTS-QA-01" \
-  --metrics-mode="pull"
+  --custom-labels="dbtype=mssql,env=qa,node=EMTS-QA-01"
 
 ```
 

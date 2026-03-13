@@ -34,7 +34,7 @@ MSSQL_IMAGE="mcr.microsoft.com/mssql/server:2022-latest"
 MSSQL_PORT="2433"
 MSSQL_SA_PASS="DemoSa!23456"
 MSSQL_PMM_USER="pmm"
-MSSQL_PMM_PASS="PmmMssql!234"
+MSSQL_PMM_PASS="Str0ng#Audit789!"
 
 # ----- 顏色 -----
 RED='\033[0;31m'
@@ -387,7 +387,7 @@ deploy_mssql() {
 IF NOT EXISTS (SELECT 1 FROM sys.server_principals WHERE name = '${MSSQL_PMM_USER}')
 BEGIN
   CREATE LOGIN [${MSSQL_PMM_USER}] WITH PASSWORD = '${MSSQL_PMM_PASS}',
-    CHECK_POLICY = ON, CHECK_EXPIRATION = OFF;
+    CHECK_POLICY = OFF, CHECK_EXPIRATION = OFF;
 END
 GO
 IF NOT EXISTS (SELECT 1 FROM sys.database_principals WHERE name = '${MSSQL_PMM_USER}')
