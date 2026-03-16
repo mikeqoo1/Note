@@ -36,7 +36,7 @@ scp -r PMM/ user@target-host:~/PMM/
 
 # 在目標機器上
 cd ~/PMM
-chmod +x pmm-client.sh pmm_server.sh scripts/*.sh
+chmod +x pmm_client.sh pmm_server.sh scripts/*.sh
 ```
 
 ---
@@ -47,18 +47,18 @@ chmod +x pmm-client.sh pmm_server.sh scripts/*.sh
 
 ```bash
 # 基本用法（預設 PMM Server = 192.168.199.234:18443）
-sudo bash pmm-client.sh
+sudo bash pmm_client.sh
 
 # 指定 PMM Server 位址與密碼
 PMM_SERVER_ADDR="你的PMM_SERVER_IP:18443" \
 PMM_PASS="你的密碼" \
-sudo -E bash pmm-client.sh
+sudo -E bash pmm_client.sh
 
 # 如果 port 7777 被佔用（腳本會自動偵測並提示）
 PMM_AGENT_LISTEN_PORT=17777 \
 PMM_SERVER_ADDR="192.168.199.234:18443" \
 PMM_PASS="Aa123456" \
-sudo -E bash pmm-client.sh
+sudo -E bash pmm_client.sh
 ```
 
 ### 可調整的環境變數
@@ -234,7 +234,7 @@ cd ~/PMM
 PMM_AGENT_LISTEN_PORT=17777 \
 PMM_SERVER_ADDR="192.168.199.234:18443" \
 PMM_PASS="Aa123456" \
-sudo -E bash pmm-client.sh
+sudo -E bash pmm_client.sh
 
 # 2. 部署 Demo 資料庫
 sudo bash scripts/deploy-demo-dbs.sh
@@ -252,13 +252,59 @@ sudo bash scripts/add-db.sh
 ```
 PMM/
 ├── pmm_server.sh              # 部署 PMM Server（Docker）
-├── pmm-client.sh              # 部署 PMM Client（Docker，繞過 entrypoint）
+├── pmm_client.sh              # 部署 PMM Client（Docker，繞過 entrypoint）
 ├── mssql.json                 # MSSQL Grafana Dashboard（手動 Import）
+├── audit-log-dashboard.json   # DB Audit Log Dashboard（Loki，手動 Import）
 ├── scripts/
 │   ├── README.md              # 本文件
 │   ├── deploy-demo-dbs.sh     # 一鍵部署三種 Demo DB（含帳號/Audit/範例資料）
-│   └── add-db.sh              # 互動式註冊 DB 到 PMM（含一鍵 Demo 模式）
+│   ├── add-db.sh              # 互動式註冊 DB 到 PMM（含一鍵 Demo 模式）
+│   ├── deploy-loki.sh         # 在 PMM Server 上部署 Loki（audit log 收集）
+│   ├── deploy-promtail.sh     # 在 DB 主機上部署 Promtail（推送 log 到 Loki）
+│   └── setup-db-audit.sh      # 在 DB 容器中啟用 audit log
 ```
+
+---
+
+## 步驟六（選用）：部署 Audit Log 收集（Loki + Promtail）
+
+在 PMM Grafana 中查看資料庫 audit log，需要部署 Loki（集中 log 儲存）和 Promtail（log 收集）。
+
+### 架構
+
+```
+DB 主機 (Promtail) ──push──> PMM Server (Loki) ──query──> Grafana
+```
+
+### 部署步驟
+
+```bash
+# 1. 在 PMM Server 主機 (234) 上部署 Loki
+sudo bash scripts/deploy-loki.sh
+
+# 2. 在各 DB 主機上啟用 audit log
+sudo bash scripts/setup-db-audit.sh
+# 選 d → Demo 環境一鍵設定
+
+# 3. 在各 DB 主機上部署 Promtail
+sudo bash scripts/deploy-promtail.sh http://192.168.199.234:3100
+
+# 4. 在 PMM Grafana 中 Import audit-log-dashboard.json
+#    或到 Explore → 選 Loki datasource → 查詢:
+#    {job="db-audit"}
+```
+
+### Audit Log 類型
+
+| 資料庫 | Audit 機制 | 收集方式 |
+|--------|-----------|---------|
+| MariaDB | server_audit plugin | Docker container logs → Promtail |
+| PostgreSQL | pgaudit extension | Docker container logs → Promtail |
+| MSSQL | SQL Server Audit (.sqlaudit) | 需定期轉文字 → Promtail |
+
+> **MSSQL 注意**：SQL Server Audit 產生的是二進位 `.sqlaudit` 檔案，
+> 需要用 `sys.fn_get_audit_file()` 轉換。`setup-db-audit.sh` 會建立轉換腳本，
+> 設定 cron job 定期匯出即可。
 
 ---
 
@@ -280,7 +326,7 @@ sudo firewall-cmd --list-ports
 腳本會自動偵測並報錯，改用其他 port 即可：
 
 ```bash
-PMM_AGENT_LISTEN_PORT=17777 sudo -E bash pmm-client.sh
+PMM_AGENT_LISTEN_PORT=17777 sudo -E bash pmm_client.sh
 ```
 
 之後所有 `pmm-admin` 指令都要加 `--pmm-agent-listen-port=17777`，
