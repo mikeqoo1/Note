@@ -16,7 +16,7 @@ LOKI_DATA_DIR="/data/loki"
 LOKI_CONFIG_DIR="/data/loki/config"
 PMM_NETWORK="pmm-net"
 PMM_CONTAINER="pmm-server"
-GRAFANA_ADMIN_PASS="${GRAFANA_ADMIN_PASS:-admin}"
+GRAFANA_ADMIN_PASS="${GRAFANA_ADMIN_PASS:-Aa123456}"
 
 echo "========================================="
 echo " 部署 Loki — PMM Audit Log 收集"
