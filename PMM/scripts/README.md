@@ -36,7 +36,7 @@ scp -r PMM/ user@target-host:~/PMM/
 
 # 在目標機器上
 cd ~/PMM
-chmod +x pmm-client.sh pmm_server.sh scripts/*.sh
+chmod +x pmm_client.sh pmm_server.sh scripts/*.sh
 ```
 
 ---
@@ -47,18 +47,18 @@ chmod +x pmm-client.sh pmm_server.sh scripts/*.sh
 
 ```bash
 # 基本用法（預設 PMM Server = 192.168.199.234:18443）
-sudo bash pmm-client.sh
+sudo bash pmm_client.sh
 
 # 指定 PMM Server 位址與密碼
 PMM_SERVER_ADDR="你的PMM_SERVER_IP:18443" \
 PMM_PASS="你的密碼" \
-sudo -E bash pmm-client.sh
+sudo -E bash pmm_client.sh
 
 # 如果 port 7777 被佔用（腳本會自動偵測並提示）
 PMM_AGENT_LISTEN_PORT=17777 \
 PMM_SERVER_ADDR="192.168.199.234:18443" \
 PMM_PASS="Aa123456" \
-sudo -E bash pmm-client.sh
+sudo -E bash pmm_client.sh
 ```
 
 ### 可調整的環境變數
@@ -234,7 +234,7 @@ cd ~/PMM
 PMM_AGENT_LISTEN_PORT=17777 \
 PMM_SERVER_ADDR="192.168.199.234:18443" \
 PMM_PASS="Aa123456" \
-sudo -E bash pmm-client.sh
+sudo -E bash pmm_client.sh
 
 # 2. 部署 Demo 資料庫
 sudo bash scripts/deploy-demo-dbs.sh
@@ -252,7 +252,7 @@ sudo bash scripts/add-db.sh
 ```
 PMM/
 ├── pmm_server.sh              # 部署 PMM Server（Docker）
-├── pmm-client.sh              # 部署 PMM Client（Docker，繞過 entrypoint）
+├── pmm_client.sh              # 部署 PMM Client（Docker，繞過 entrypoint）
 ├── mssql.json                 # MSSQL Grafana Dashboard（手動 Import）
 ├── audit-log-dashboard.json   # DB Audit Log Dashboard（Loki，手動 Import）
 ├── scripts/
@@ -326,7 +326,7 @@ sudo firewall-cmd --list-ports
 腳本會自動偵測並報錯，改用其他 port 即可：
 
 ```bash
-PMM_AGENT_LISTEN_PORT=17777 sudo -E bash pmm-client.sh
+PMM_AGENT_LISTEN_PORT=17777 sudo -E bash pmm_client.sh
 ```
 
 之後所有 `pmm-admin` 指令都要加 `--pmm-agent-listen-port=17777`，
