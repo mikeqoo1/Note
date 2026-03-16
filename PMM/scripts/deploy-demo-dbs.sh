@@ -224,7 +224,7 @@ deploy_postgresql() {
       -c shared_preload_libraries=pg_stat_statements \
       -c pg_stat_statements.track=all \
       -c track_activity_query_size=2048 \
-      -c logging_collector=on \
+      -c logging_collector=off \
       -c log_destination=stderr \
       -c "log_line_prefix=%m [%p] %u@%d %h " \
       -c log_statement=ddl
