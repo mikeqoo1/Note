@@ -102,13 +102,6 @@ for CONTAINER in ${POSTGRES_CONTAINERS}; do
           __path__: /var/lib/docker/containers/${CONTAINER_ID}/${CONTAINER_ID}-json.log
     pipeline_stages:
       - docker: {}
-      - match:
-          selector: '{container="${CONTAINER}"}'
-          stages:
-            - regex:
-                expression: '.*AUDIT:.*'
-            - drop:
-                expression: '^(?!.*AUDIT:).*$'
 PEOF
 done
 
