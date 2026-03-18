@@ -1,9 +1,7 @@
-version: '2.3'
-
 services:
   redis:
     restart: always
-    image: redis:6.2
+    image: redis:7
     command:
     - --loglevel warning
     volumes:
@@ -11,7 +9,7 @@ services:
 
   postgresql:
     restart: always
-    image: sameersbn/postgresql:14-20230628
+    image: kkimurak/sameersbn-postgresql:16
     cap_add:
     - ALL
     volumes:
@@ -23,7 +21,7 @@ services:
     - DB_EXTENSION=pg_trgm,btree_gist
   gitlab:
     restart: always
-    image: sameersbn/gitlab:17.3.3
+    image: sameersbn/gitlab:17.11.7
     cap_add:
     - ALL
     depends_on:
@@ -159,32 +157,6 @@ services:
     - OAUTH_AZURE_API_KEY=
     - OAUTH_AZURE_API_SECRET=
     - OAUTH_AZURE_TENANT_ID=
-
-    - LDAP_ENABLED=true
-    - LDAP_LABEL=LDAP
-    - LDAP_HOST=192.168.199.95
-    - LDAP_PORT=389
-    - LDAP_UID=cn
-    - LDAP_METHOD=plain
-    - LDAP_VERIFY_SSL=true
-    - LDAP_CA_FILE=
-    - LDAP_SSL_VERSION=
-    - LDAP_BIND_DN=cn=admin,dc=concords,dc=com
-    - LDAP_PASS=Aa123456
-    - LDAP_TIMEOUT=10
-    - LDAP_ACTIVE_DIRECTORY=false
-    - LDAP_ALLOW_USERNAME_OR_EMAIL_LOGIN=true
-    - LDAP_BLOCK_AUTO_CREATED_USERS=false
-    - LDAP_BASE=ou=People,dc=concords,dc=com
-    - LDAP_USER_FILTER=
-    - LDAP_USER_ATTRIBUTE_USERNAME=[uid, userid, sAMAccountName, cn]
-    - LDAP_USER_ATTRIBUTE_MAIL=[mail, email, userPrincipalName, Email]
-    - LDAP_USER_ATTRIBUTE_NAME=cn
-    - LDAP_USER_ATTRIBUTE_FIRSTNAME=givenName
-    - LDAP_USER_ATTRIBUTE_LASTNAME=sn
-    - LDAP_LOWERCASE_USERNAMES=false
-    - LDAP_PREVENT_LDAP_SIGN_IN=false
-
 
 volumes:
   redis-data:
