@@ -7,6 +7,21 @@
 ssh-keygen -t rsa -b 4096 -C "你的信箱"
 把pub的內容丟掉github的ssh-key設定
 然後把專案遠端URL改ssh的形式
+
+萬一有不同帳號但是用同一台機器
+
+ssh-keygen -t ed25519 -f ~/.ssh/github_company -C "公司信箱"
+
+cat ~/.ssh/github_company.pub
+
+nano ~/.ssh/config
+
+Host github.com
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/github_company
+  IdentitiesOnly yes
+
 ```
 
 ## [Linux](Linux.md)
