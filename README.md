@@ -16,7 +16,7 @@ cat ~/.ssh/github_company.pub
 
 nano ~/.ssh/config
 
-Host github.com
+Host github-company
   HostName github.com
   User git
   IdentityFile ~/.ssh/github_company
