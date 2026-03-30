@@ -162,9 +162,9 @@ sudo docker rm gitlab-runner-docker
 
 4. 用同樣的方式重建
 
-sudo docker run -d --name gitlab-runner-docker --restart always\
--v /opt/gitlab-runner/config:/etc/gitlab-runner\
--v /var/run/docker.sock:/var/run/docker.sock\
+sudo docker run -d --name gitlab-runner-docker --restart always \
+-v /opt/gitlab-runner/config:/etc/gitlab-runner \
+-v /var/run/docker.sock:/var/run/docker.sock \
 gitlab/gitlab-runner:latest
 
 5. 匯入 235 的 https 自簽憑證
