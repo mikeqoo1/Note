@@ -21,7 +21,7 @@ services:
     - DB_EXTENSION=pg_trgm,btree_gist
   gitlab:
     restart: always
-    image: sameersbn/gitlab:17.11.7
+    image: sameersbn/gitlab:18.9.2
     cap_add:
     - ALL
     depends_on:
