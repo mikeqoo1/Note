@@ -29,6 +29,7 @@ services:
     - postgresql
     ports:
     - "30023:22"
+    - "30002:80"
     - "30001:443"
     volumes:
     - /opt/gitlab:/home/git/data:Z
