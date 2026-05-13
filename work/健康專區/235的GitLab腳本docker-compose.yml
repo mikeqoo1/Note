@@ -21,7 +21,7 @@ services:
     - DB_EXTENSION=pg_trgm,btree_gist
   gitlab:
     restart: always
-    image: sameersbn/gitlab:18.9.2
+    image: sameersbn/gitlab:18.11.2
     cap_add:
     - ALL
     depends_on:
@@ -33,6 +33,10 @@ services:
     - "30001:443"
     volumes:
     - /opt/gitlab:/home/git/data:Z
+    - /opt/gitlab-logrotate/gitlab:/etc/logrotate.d/gitlab:ro,Z
+    - /opt/gitlab-logrotate/gitlab-nginx:/etc/logrotate.d/gitlab-nginx:ro,Z
+    - /opt/gitlab-logrotate/gitaly:/etc/logrotate.d/gitaly:ro,Z
+    - /opt/gitlab-logrotate/gitlab-shell:/etc/logrotate.d/gitlab-shell:ro,Z
     healthcheck:
       test: ["CMD", "/usr/local/sbin/healthcheck"]
       interval: 5m
@@ -56,9 +60,13 @@ services:
 
     - GITLAB_HTTPS=true
     - SSL_SELF_SIGNED=true
+    #- GITLAB_HTTPS=false
+    #- SSL_SELF_SIGNED=false
+
 
     - GITLAB_HOST=192.168.199.235
     - GITLAB_PORT=30001
+    #- GITLAB_PORT=30002
     - GITLAB_SSH_PORT=30023
     - GITLAB_RELATIVE_URL_ROOT=
     - GITLAB_SECRETS_DB_KEY_BASE=long-and-random-alphanumeric-string
