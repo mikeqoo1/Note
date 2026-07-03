@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Conex Platform 容器部署架構規劃</title>
+  <style>
+    :root {
+      --bg: #f6f8fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --primary: #2563eb;
+      --primary-dark: #1e40af;
+      --border: #e5e7eb;
+      --code-bg: #111827;
+      --code-text: #e5e7eb;
+      --accent: #eff6ff;
+      --warn: #fff7ed;
+      --warn-border: #fdba74;
+      --ok: #ecfdf5;
+      --ok-border: #86efac;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", "Microsoft JhengHei", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.75;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1e3a8a, #2563eb);
+      color: white;
+      padding: 48px 24px;
+    }
+
+    header .wrap, main {
+      max-width: 1120px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: 34px;
+      letter-spacing: 0.02em;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: #dbeafe;
+      font-size: 17px;
+    }
+
+    main {
+      padding: 28px 20px 64px;
+    }
+
+    .toc, section {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+    }
+
+    h2 {
+      margin: 0 0 16px;
+      font-size: 24px;
+      border-left: 5px solid var(--primary);
+      padding-left: 12px;
+    }
+
+    h3 {
+      margin-top: 24px;
+      margin-bottom: 10px;
+      font-size: 19px;
+      color: var(--primary-dark);
+    }
+
+    ul, ol { padding-left: 24px; }
+
+    .toc ul {
+      columns: 2;
+      margin: 0;
+    }
+
+    .toc a {
+      color: var(--primary-dark);
+      text-decoration: none;
+    }
+
+    .toc a:hover { text-decoration: underline; }
+
+    code {
+      background: #eef2ff;
+      color: #1e3a8a;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-family: "Cascadia Code", Consolas, monospace;
+      font-size: 0.95em;
+    }
+
+    pre {
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 16px;
+      border-radius: 12px;
+      overflow-x: auto;
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    pre code {
+      background: transparent;
+      color: inherit;
+      padding: 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      overflow: hidden;
+      border-radius: 12px;
+    }
+
+    th, td {
+      border: 1px solid var(--border);
+      padding: 12px 14px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: var(--accent);
+      color: #1e3a8a;
+    }
+
+    .note {
+      background: var(--accent);
+      border-left: 5px solid var(--primary);
+      padding: 14px 16px;
+      border-radius: 10px;
+      margin: 16px 0;
+    }
+
+    .warning {
+      background: var(--warn);
+      border: 1px solid var(--warn-border);
+      padding: 14px 16px;
+      border-radius: 10px;
+      margin: 16px 0;
+    }
+
+    .ok {
+      background: var(--ok);
+      border: 1px solid var(--ok-border);
+      padding: 14px 16px;
+      border-radius: 10px;
+      margin: 16px 0;
+    }
+
+    .diagram {
+      background: #f8fafc;
+      border: 1px dashed #cbd5e1;
+      padding: 18px;
+      border-radius: 14px;
+      text-align: center;
+      font-family: "Cascadia Code", Consolas, monospace;
+      white-space: pre;
+      overflow-x: auto;
+      line-height: 1.6;
+    }
+
+    .checklist li {
+      margin-bottom: 8px;
+    }
+
+    footer {
+      max-width: 1120px;
+      margin: 0 auto 48px;
+      padding: 0 20px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    @media (max-width: 760px) {
+      h1 { font-size: 26px; }
+      .toc ul { columns: 1; }
+      section, .toc { padding: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>Conex Platform 容器部署架構規劃</h1>
+      <p class="subtitle">Podman 6.x / Quadlet / systemd / Rootless Podman / PostgreSQL 18 + TimescaleDB</p>
+    </div>
+  </header>
+
+  <main>
+    <nav class="toc">
+      <h2>目錄</h2>
+      <ul>
+        <li><a href="#goal">一、目標</a></li>
+        <li><a href="#architecture">二、目前規劃架構</a></li>
+        <li><a href="#directories">三、目錄規劃</a></li>
+        <li><a href="#image">四、Image 規劃</a></li>
+        <li><a href="#quadlet">五、Quadlet 規劃</a></li>
+        <li><a href="#rootless">六、Rootless 架構討論</a></li>
+        <li><a href="#direction">七、目前採用方向</a></li>
+        <li><a href="#postgres">八、PostgreSQL 規劃</a></li>
+        <li><a href="#services">九、未來服務規劃</a></li>
+        <li><a href="#poc">十、待驗證事項</a></li>
+        <li><a href="#next">十一、後續目標</a></li>
+      </ul>
+    </nav>
+
+    <section id="goal">
+      <h2>一、目標</h2>
+      <p>建立一套適合企業部署、可重複安裝、可維護、可升級的 Conex Platform 容器化架構。</p>
+      <ul>
+        <li>採用 Podman，而非 Docker。</li>
+        <li>使用 systemd 管理所有服務生命週期。</li>
+        <li>核心資料庫採 PostgreSQL 18 + TimescaleDB。</li>
+        <li>容器盡量採 Rootless 模式，降低權限風險。</li>
+        <li>支援一鍵部署、備份、升級與還原。</li>
+        <li>資料與程式完全分離。</li>
+        <li>主要適用 Rocky Linux 9 / AlmaLinux 9。</li>
+      </ul>
+    </section>
+
+    <section id="architecture">
+      <h2>二、目前規劃架構</h2>
+      <div class="diagram">Systemd (PID 1)
+        │
+        ▼
+Quadlet
+        │
+        ▼
+Podman
+        │
+        ▼
+Container</div>
+      <p>預計所有服務皆由 Quadlet 管理，例如 PostgreSQL、Redis、RabbitMQ、Grafana、Prometheus、SonarQube、API Server、Worker 等。</p>
+    </section>
+
+    <section id="directories">
+      <h2>三、目錄規劃</h2>
+      <h3>系統設定</h3>
+      <pre><code>/etc/containers/systemd/</code></pre>
+      <p>放置所有 system-level Quadlet：</p>
+      <pre><code>conex-postgres.container
+conex-redis.container
+conex-grafana.container
+...</code></pre>
+
+      <h3>安裝程式</h3>
+      <pre><code>/opt/conex/
+├── install.sh
+├── upgrade.sh
+├── backup.sh
+├── images/
+│   ├── postgres/
+│   └── redis/
+└── scripts/</code></pre>
+
+      <h3>資料目錄</h3>
+      <pre><code>/data/conex/
+├── postgres/
+├── redis/
+├── grafana/
+├── backup/
+└── logs/</code></pre>
+      <div class="note">原則：程式、Image 原始碼、systemd 設定、資料路徑分離，方便升級、備份與搬遷。</div>
+    </section>
+
+    <section id="image">
+      <h2>四、Image 規劃</h2>
+      <p>不直接使用 PostgreSQL 官方 Image 作為最終正式環境，而是採用自建 Image。</p>
+      <pre><code>postgres:18-trixie
+        +
+TimescaleDB
+        +
+Conex 初始化設定</code></pre>
+      <p>範例 Dockerfile 概念：</p>
+      <pre><code>FROM postgres:18-trixie
+
+# 安裝 TimescaleDB
+# COPY initdb/ /docker-entrypoint-initdb.d/</code></pre>
+      <p>Image 命名範例：</p>
+      <pre><code>localhost/conex-postgres:18-trixie-timescaledb</code></pre>
+      <div class="note">Quadlet 只負責執行容器，不負責在容器啟動時安裝套件。套件安裝應在 Image build 階段完成。</div>
+    </section>
+
+    <section id="quadlet">
+      <h2>五、Quadlet 規劃</h2>
+      <p>範例檔案：</p>
+      <pre><code>/etc/containers/systemd/conex-postgres.container</code></pre>
+      <p>Container 區段主要負責：</p>
+      <ul>
+        <li>Image</li>
+        <li>Port</li>
+        <li>Volume</li>
+        <li>Environment</li>
+        <li>Restart Policy</li>
+      </ul>
+      <p>Service 區段可設定：</p>
+      <pre><code>[Service]
+Restart=always
+RestartSec=10
+TimeoutStartSec=300</code></pre>
+    </section>
+
+    <section id="rootless">
+      <h2>六、Rootless 架構討論</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>方案</th>
+            <th>位置</th>
+            <th>操作方式</th>
+            <th>特性</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>User Quadlet</td>
+            <td><code>~/.config/containers/systemd/</code></td>
+            <td><code>systemctl --user</code></td>
+            <td>官方推薦的 Rootless 模式，但管理較分散，需要 linger。</td>
+          </tr>
+          <tr>
+            <td>System Quadlet</td>
+            <td><code>/etc/containers/systemd/</code></td>
+            <td><code>systemctl</code></td>
+            <td>官方成熟模式，集中管理，但預設為 rootful。</td>
+          </tr>
+          <tr>
+            <td>System Quadlet + User=</td>
+            <td><code>/etc/containers/systemd/</code></td>
+            <td><code>systemctl</code></td>
+            <td>目標是 systemd 集中管理，但 Podman 以服務帳號 rootless 執行。官方語法可行，但需自行驗證。</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>方案三流程</h3>
+      <div class="diagram">root systemd
+        │
+        ▼
+conex-postgres.service
+        │
+        ▼
+User=postgres
+        │
+        ▼
+rootless podman
+        │
+        ▼
+postgres container</div>
+
+      <p>Quadlet 的 <code>[Service]</code> 區段可以加入：</p>
+      <pre><code>[Service]
+User=postgres
+Group=postgres</code></pre>
+      <div class="warning">目前官方文件允許 <code>[Service]</code> 選項傳給 systemd，因此語法可行；但官方 Rootless 範例主要仍是 user systemd 模式，所以此方案需做 PoC 驗證後再列為公司標準。</div>
+    </section>
+
+    <section id="direction">
+      <h2>七、目前採用方向</h2>
+      <p>目前傾向採用：</p>
+      <pre><code>System Quadlet
++
+Rootless Podman
++
+User=Service Account</code></pre>
+      <p>原因：</p>
+      <ul>
+        <li>服務由 systemd 集中管理。</li>
+        <li>容器以 rootless 執行，降低權限風險。</li>
+        <li>較符合企業主機統一維護方式。</li>
+      </ul>
+    </section>
+
+    <section id="postgres">
+      <h2>八、PostgreSQL 規劃</h2>
+      <table>
+        <tbody>
+          <tr>
+            <th>Image</th>
+            <td><code>localhost/conex-postgres:18-trixie-timescaledb</code></td>
+          </tr>
+          <tr>
+            <th>資料</th>
+            <td><code>/data/conex/postgres/data</code></td>
+          </tr>
+          <tr>
+            <th>備份</th>
+            <td><code>/data/conex/postgres/backup</code></td>
+          </tr>
+          <tr>
+            <th>初始化 SQL</th>
+            <td><code>/docker-entrypoint-initdb.d/</code></td>
+          </tr>
+        </tbody>
+      </table>
+      <p>TimescaleDB 初始化：</p>
+      <pre><code>CREATE EXTENSION IF NOT EXISTS timescaledb;</code></pre>
+    </section>
+
+    <section id="services">
+      <h2>九、未來服務規劃</h2>
+      <p>預計所有服務皆採相同模式部署：</p>
+      <ul>
+        <li>PostgreSQL</li>
+        <li>Redis</li>
+        <li>RabbitMQ</li>
+        <li>Grafana</li>
+        <li>Prometheus</li>
+        <li>SonarQube</li>
+        <li>API</li>
+        <li>Worker</li>
+      </ul>
+    </section>
+
+    <section id="poc">
+      <h2>十、待驗證事項（PoC）</h2>
+      <ol class="checklist">
+        <li><strong>Rootless 驗證：</strong>確認 <code>podman info</code> 是否顯示 <code>rootless: true</code>。</li>
+        <li><strong>開機自啟：</strong>確認 <code>systemctl enable</code> 後，重新開機容器可正常啟動。</li>
+        <li><strong>Linger：</strong>確認 <code>loginctl enable-linger postgres</code> 是否仍為必要條件。</li>
+        <li><strong>Quadlet + User=：</strong>確認 <code>[Service] User=</code> 與 <code>Group=</code> 在 Podman 6.x 行為穩定。</li>
+        <li><strong>Auto Update：</strong>驗證 <code>AutoUpdate=registry</code> 在 rootless 模式是否正常。</li>
+        <li><strong>SELinux：</strong>驗證 Volume 使用 <code>:Z</code> 是否即可正常運作，是否需額外 policy。</li>
+        <li><strong>PostgreSQL Volume：</strong>確認 PG18 掛載 <code>/var/lib/postgresql</code> 是否符合官方建議。</li>
+        <li><strong>Backup：</strong>建立並驗證 <code>backup.sh</code>，包含 <code>pg_dump</code>、<code>pg_basebackup</code>、WAL Archive。</li>
+        <li><strong>Restore：</strong>驗證全新主機 Restore 後可正常啟動。</li>
+        <li><strong>Upgrade：</strong>驗證 PostgreSQL 18.x 與未來 19 的升級流程。</li>
+        <li><strong>TimescaleDB：</strong>驗證 <code>ALTER EXTENSION</code> 升級流程。</li>
+        <li><strong>Log：</strong>確認 <code>journalctl</code> 是否足以取代日常 container log 管理。</li>
+        <li><strong>Monitoring：</strong>驗證 Cockpit 是否可正常管理 Quadlet、systemd 與容器狀態。</li>
+      </ol>
+    </section>
+
+    <section id="next">
+      <h2>十一、後續目標</h2>
+      <p>建立一套 Conex Platform 安裝框架。</p>
+      <pre><code>./install.sh
+    ↓
+建立 Service Account
+    ↓
+建立資料目錄
+    ↓
+建立 Image
+    ↓
+安裝 Quadlet
+    ↓
+systemctl daemon-reload
+    ↓
+systemctl enable --now
+    ↓
+完成部署</code></pre>
+      <div class="ok">最終目標：PostgreSQL、Redis、Grafana、Prometheus、RabbitMQ、SonarQube 等服務皆可透過相同流程部署與維護。</div>
+
+      <h3>建議補充文件</h3>
+      <p>後續可再建立一份 <strong>Conex Container Deployment Guideline</strong>，定義公司內部部署規範：</p>
+      <ul>
+        <li>Service Account 命名規範</li>
+        <li><code>/data/conex</code> 目錄標準</li>
+        <li>Quadlet 撰寫規範</li>
+        <li>Dockerfile 撰寫規範</li>
+        <li>Image Tag 規範</li>
+        <li>備份與升級流程</li>
+        <li>systemd 命名規範</li>
+        <li>SELinux 與權限規範</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    文件用途：Conex Platform 容器部署架構討論稿。建議先完成 PoC 驗證，再作為正式公司部署標準。
+  </footer>
+</body>
+</html>
