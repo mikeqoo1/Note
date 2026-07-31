@@ -1,0 +1,56 @@
+# GitLab EE（官方 omnibus 映像）docker compose
+# 用法：cp .env.example .env 改好參數後 → ./scripts/deploy.sh
+services:
+  gitlab:
+    image: gitlab/gitlab-ee:${GITLAB_VERSION}
+    container_name: ${GITLAB_CONTAINER_NAME:-gitlab-ee}
+    hostname: ${GITLAB_HOSTNAME}
+    restart: unless-stopped
+    shm_size: '256m'
+    ports:
+      - "${GITLAB_HTTP_PORT}:80"
+      - "${GITLAB_HTTPS_PORT}:443"
+      - "${GITLAB_SSH_PORT}:22"
+    environment:
+      TZ: ${TZ:-Asia/Taipei}
+      # 注意：不要在這裡放空的 GITLAB_ROOT_PASSWORD —— 只要變數存在（即使空字串）
+      # 官方映像就會拿去當初始密碼，不足 8 碼會讓 reconfigure FATAL、容器重啟循環。
+      # 要預設密碼的話自己加一行：GITLAB_ROOT_PASSWORD: '<至少8碼>'
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url '${EXTERNAL_URL}'
+        # 固定容器內 nginx 監聽埠：external_url 帶非標準埠時，omnibus 預設會把
+        # nginx 監聽埠改成該埠，導致上面的埠對映失效 —— 這裡強制釘回 80/443
+        nginx['listen_port'] = ${NGINX_INTERNAL_PORT:-80}
+        gitlab_rails['gitlab_shell_ssh_port'] = ${GITLAB_SSH_PORT}
+        gitlab_rails['time_zone'] = '${TZ:-Asia/Taipei}'
+
+        # SMTP：公司 MX 閘道，內網免認證轉發
+        gitlab_rails['smtp_enable'] = true
+        gitlab_rails['smtp_address'] = '${SMTP_ADDRESS}'
+        gitlab_rails['smtp_port'] = ${SMTP_PORT:-25}
+        gitlab_rails['smtp_domain'] = 'concords.com.tw'
+        gitlab_rails['smtp_enable_starttls_auto'] = true
+        gitlab_rails['smtp_openssl_verify_mode'] = 'none'
+        gitlab_rails['gitlab_email_enabled'] = true
+        gitlab_rails['gitlab_email_from'] = '${GITLAB_EMAIL_FROM}'
+        gitlab_rails['gitlab_email_reply_to'] = '${GITLAB_EMAIL_FROM}'
+
+        # 備份保留（秒）：gitlab-backup 只清 tar 檔，secrets 另外備份（見 scripts/backup.sh）
+        gitlab_rails['backup_keep_time'] = ${BACKUP_KEEP_DAYS:-7} * 86400
+    volumes:
+      - ${GITLAB_HOME}/config:/etc/gitlab
+      - ${GITLAB_HOME}/logs:/var/log/gitlab
+      - ${GITLAB_HOME}/data:/var/opt/gitlab
+    healthcheck:
+      # 官方 wrapper 會依 gitlab.rb 產生正確 scheme/埠號打 liveness，
+      # 不會踩到「寫死 http 被 301 轉 https 而永遠 unhealthy」的坑
+      test: ["CMD", "/opt/gitlab/bin/gitlab-healthcheck", "--fail", "--max-time", "10"]
+      interval: 60s
+      timeout: 30s
+      retries: 5
+      start_period: 10m
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "3"
