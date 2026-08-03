@@ -6,7 +6,9 @@ services:
     container_name: ${GITLAB_CONTAINER_NAME:-gitlab-ee}
     hostname: ${GITLAB_HOSTNAME}
     restart: unless-stopped
-    shm_size: '256m'
+    # Prometheus metrics 的 mmap 檔全放 /dev/shm，256m 上線幾天就會塞滿：
+    # 寫入失敗會以每秒 MB 級速度往 application_json.log 噴 WARN+DEBUG（2026-08-03 實際發生）
+    shm_size: '1g'
     ports:
       - "${GITLAB_HTTP_PORT}:80"
       - "${GITLAB_HTTPS_PORT}:443"
@@ -37,6 +39,11 @@ services:
 
         # 備份保留（秒）：gitlab-backup 只清 tar 檔，secrets 另外備份（見 scripts/backup.sh）
         gitlab_rails['backup_keep_time'] = ${BACKUP_KEEP_DAYS:-7} * 86400
+
+        # log 防爆：預設 logrotate 一天才輪替一次，噴 log 時單檔一天能長上 GB —— 超過 200M 就輪替
+        logging['logrotate_maxsize'] = "200M"
+        # 明確固定 INFO，避免 DEBUG 等級的 stack trace 灌進 application_json.log
+        gitlab_rails['env'] = { 'GITLAB_LOG_LEVEL' => 'INFO' }
     volumes:
       - ${GITLAB_HOME}/config:/etc/gitlab
       - ${GITLAB_HOME}/logs:/var/log/gitlab
