@@ -9,7 +9,7 @@ services:
 
   postgresql:
     restart: always
-    image: kkimurak/sameersbn-postgresql:16
+    image: kkimurak/sameersbn-postgresql:17
     cap_add:
     - ALL
     volumes:
@@ -21,7 +21,8 @@ services:
     - DB_EXTENSION=pg_trgm,btree_gist
   gitlab:
     restart: always
-    image: sameersbn/gitlab:18.11.2
+    image: sameersbn/gitlab:19.2.9
+    shm_size: '1g'
     cap_add:
     - ALL
     depends_on:
@@ -38,7 +39,7 @@ services:
     - /opt/gitlab-logrotate/gitaly:/etc/logrotate.d/gitaly:ro,Z
     - /opt/gitlab-logrotate/gitlab-shell:/etc/logrotate.d/gitlab-shell:ro,Z
     healthcheck:
-      test: ["CMD", "/usr/local/sbin/healthcheck"]
+      test: ["CMD", "curl", "--insecure", "--silent", "--fail", "https://127.0.0.1/-/liveness"]
       interval: 5m
       timeout: 10s
       retries: 3
@@ -79,21 +80,23 @@ services:
     - GITLAB_NOTIFY_ON_BROKEN_BUILDS=true
     - GITLAB_NOTIFY_PUSHER=false
 
-    - GITLAB_EMAIL=notifications@example.com
-    - GITLAB_EMAIL_REPLY_TO=noreply@example.com
+    - GITLAB_EMAIL=gitlab@concords.com.tw
+    - GITLAB_EMAIL_REPLY_TO=noreply@concords.com.tw
     - GITLAB_INCOMING_EMAIL_ADDRESS=reply@example.com
 
     - GITLAB_BACKUP_SCHEDULE=daily
     - GITLAB_BACKUP_TIME=01:00
+    - GITLAB_BACKUP_EXPIRY=86400
 
-    - SMTP_ENABLED=false
-    - SMTP_DOMAIN=www.example.com
-    - SMTP_HOST=smtp.gmail.com
-    - SMTP_PORT=587
-    - SMTP_USER=mailer@example.com
+    - SMTP_ENABLED=true
+    - SMTP_DOMAIN=concords.com.tw
+    - SMTP_HOST=mailgw.concords.com.tw
+    - SMTP_PORT=25
+    - SMTP_USER=
     - SMTP_PASS=password
     - SMTP_STARTTLS=true
     - SMTP_AUTHENTICATION=login
+    - SMTP_OPENSSL_VERIFY_MODE=none
 
     - IMAP_ENABLED=false
     - IMAP_HOST=imap.gmail.com
